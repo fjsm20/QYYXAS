@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd ">
+
+
+	<!--调度工厂-->
+	<bean lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="requestTrigger" />
+			</list>
+		</property>
+	</bean>
+
+
+
+
+	<!-- 请求列表 -->
+	<bean id="requestTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="requestJobDetail" />
+		</property>
+		<!-- 每隔2秒触发 -->
+		<property name="cronExpression">
+			<value>0/1 * * * * ?</value>
+		</property>
+	</bean>
+
+
+	<bean id="requestJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="dataCollectTask" />
+		</property>
+		<property name="targetMethod">
+			<value>requestLifeCtrl</value>
+		</property>
+		<property name="concurrent" value="false"/>
+	</bean>
+
+	<bean id="dataCollectTask" class="com.shine.yxqy.quarz.DataCollectTask" />
+</beans>
