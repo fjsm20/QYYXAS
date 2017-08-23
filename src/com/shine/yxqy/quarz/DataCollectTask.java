@@ -9,9 +9,15 @@ public class DataCollectTask {
 
 
 
-    public void requestLifeCtrl(String args) {
+    public void requestLifeCtrl() {
         log.info("执行调度任务");
         System.out.println("执行调度任务："+new Date());
     }
+
+    protected void execute()  {
+        long ms = System.currentTimeMillis();
+        System.out.println("\t\t" + new Date(ms));
+    }
+
 
 }
