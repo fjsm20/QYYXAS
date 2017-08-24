@@ -1,10 +1,9 @@
 package com.shine.yxqy.test;
 
 
+import com.shine.yxqy.util.FileUtil;
 import com.shine.yxqy.util.FtpUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -50,13 +49,11 @@ public class Test {
 //                    ctx.setFileSize(inStream.available());
 //                    ctx.setFileStream(inStream);
 //                    ctx.setIsSuccess(true);
-                    FileOutputStream fop = new FileOutputStream(new File("D:/test/1.txt"));
-                    int len = 0;
-                    byte[] buf = new byte[1024];
-                    while((len=inStream.read(buf))>=0) {
-                        fop.write(buf, 0, len);
+                    try {
+                        FileUtil.write("D:/test/","1.txt",inStream);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    fop.close();
                 }
 
                 @Override
