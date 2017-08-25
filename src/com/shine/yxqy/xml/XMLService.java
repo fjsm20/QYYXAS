@@ -1,6 +1,6 @@
 package com.shine.yxqy.xml;
 
-import com.shine.yxqy.PO.UserDocument;
+import com.shine.yxqy.po.UserDocument;
 import org.apache.log4j.Logger;
 
 import java.util.List;

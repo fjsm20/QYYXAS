@@ -3,6 +3,7 @@ package com.shine.yxqy.util;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.util.Properties;
 
 /**
  * 文件处理工具类
@@ -122,6 +123,55 @@ public class FileUtil {
             e.printStackTrace();
         }
         return -1;
+    }
+
+
+    /**
+     * 获取项目的class级别绝对路径：例如 D:/Tomcat7/webapps/EeamsWeb/WEB-INF/classes/
+     * @return
+     * @throws Exception
+     */
+    public static String getWebRealPath() {
+        String realPath="";
+        try{
+            //获得项目的class路径   path例子： /D:/Tomcat7/webapps/EeamsWeb/WEB-INF/classes/
+            String path = FileUtil.class.getClassLoader().getResource("").getPath();
+            path = path.substring(0,path.indexOf("classes") ) ;
+            if(path.startsWith("/")) {
+                realPath = path.substring(1);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return realPath;
+    }
+
+    /**
+     * 根据提供的路径，读取properties文件
+     * @param path properties文件的路径
+     * @return
+     * @throws Exception
+     */
+    public static Properties readProperties(String path) {
+        Properties property = new Properties();
+        File file = new File(path);
+        InputStream is = null;
+        try {
+            is = new  FileInputStream(file);
+            property.load(is);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            if(is!= null){
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return property;
     }
 
 

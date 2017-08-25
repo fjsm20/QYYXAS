@@ -1,9 +1,12 @@
 package com.shine.yxqy.test;
 
 
+import com.shine.yxqy.busi.ServiceUtil;
 import com.shine.yxqy.util.FileUtil;
 import com.shine.yxqy.util.FtpUtil;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -31,36 +34,44 @@ public class Test {
 //            System.out.println(rs);
 
             /***ftp 请求***/
-            String addr = "ftp://ftp2:ftp@192.168.1.7:21";
-            String ftpFile =  "/f.txt";
+//            String addr = "ftp://ftp2:ftp@192.168.1.7:21";
+//            String ftpFile =  "/f.txt";
+//
+//            FtpUtil.getFile(addr, ftpFile,new FtpUtil.FtpCallback() {
+//                @Override
+//                public void postSend() {
+////                    logger.debug("[FTP]正在发起下载文件请求");
+//                }
+//
+//                @Override
+//                public void onReceive(InputStream inStream) throws IOException {
+//                    if(inStream ==null || (inStream!=null && inStream.available()<=0)){
+//                        throw new IOException("FTP获取的文件流为空");
+//                    }
+//                    System.out.println(inStream.available());
+////                    ctx.setFileSize(inStream.available());
+////                    ctx.setFileStream(inStream);
+////                    ctx.setIsSuccess(true);
+//                    try {
+//                        FileUtil.write("D:/test/","1.txt",inStream);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//                @Override
+//                public void onException(Exception e) {
+//                    e.printStackTrace();
+//                }
+//            });
 
-            FtpUtil.getFile(addr, ftpFile,new FtpUtil.FtpCallback() {
-                @Override
-                public void postSend() {
-//                    logger.debug("[FTP]正在发起下载文件请求");
-                }
 
-                @Override
-                public void onReceive(InputStream inStream) throws IOException {
-                    if(inStream ==null || (inStream!=null && inStream.available()<=0)){
-                        throw new IOException("FTP获取的文件流为空");
-                    }
-                    System.out.println(inStream.available());
-//                    ctx.setFileSize(inStream.available());
-//                    ctx.setFileStream(inStream);
-//                    ctx.setIsSuccess(true);
-                    try {
-                        FileUtil.write("D:/test/","1.txt",inStream);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+            /****上传文件***/
+            /****上传文件***/
+            File file = new File("D:\\test\\aaf.pdf");
+            String data = ServiceUtil.doUploadFile(file.getName(),"2017001",file);
+            System.out.println("执行结果："+data);
 
-                @Override
-                public void onException(Exception e) {
-                    e.printStackTrace();
-                }
-            });
         } catch (Exception e) {
             e.printStackTrace();
         }

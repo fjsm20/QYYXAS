@@ -1,6 +1,6 @@
 package com.shine.yxqy.xml.impl;
 
-import com.shine.yxqy.PO.UserDocument;
+import com.shine.yxqy.po.UserDocument;
 import com.shine.yxqy.xml.XMLService;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;

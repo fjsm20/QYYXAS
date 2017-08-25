@@ -1,4 +1,4 @@
-package com.shine.yxqy.PO;
+package com.shine.yxqy.po;
 
 /**
  * 资料对象
