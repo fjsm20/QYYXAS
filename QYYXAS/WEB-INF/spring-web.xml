@@ -9,9 +9,6 @@
     <!--&lt;!&ndash; 设置使用注解的类所在的jar包 &ndash;&gt;-->
     <!--<context:component-scan base-package="com.shine.yxqy"/>-->
 
-    <bean id="helloWorld" class="com.shine.yxqy.test.HelloWorld">
-        <property name="name" value="Spring"></property>
-    </bean>
-
+    <import resource="pool-config.xml"/>
 
 </beans>

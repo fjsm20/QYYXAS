@@ -178,38 +178,39 @@ public class ServiceUtil {
 
     /**
      * 事中影像信息提交
-     * @param param
+     * @param paramMap
      * @return
      * @throws Exception
      */
-    public static String submitProcScanInfo(String param) throws Exception{
+    public static String submitProcScanInfo(Map<String,String> paramMap) throws Exception{
         String token = getBusToken();
         String urlStr = fsServerURL+Constant.SUBMIT_PROCSCANINFO+token;
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("method_id","020123");
-        jsonObject.put("src_order_no","XY0012229");
-        jsonObject.put("busi_code","2100500000");
-        jsonObject.put("cust_prop","0");
-        jsonObject.put("acct_code","10000000911");
-        jsonObject.put("cert_type","0");
-        jsonObject.put("cert_code","1122331");
-        jsonObject.put("cust_name","张三");
-        jsonObject.put("opr_date","20170826");
-        jsonObject.put("dep_code","3106");
+        jsonObject.put("src_order_no",paramMap.get("src_order_no"));
+        jsonObject.put("busi_code",paramMap.get("busi_code"));
+        jsonObject.put("cust_prop",paramMap.get("cust_prop"));
+        jsonObject.put("acct_code",paramMap.get("acct_code"));
+        jsonObject.put("cert_type",paramMap.get("cert_type"));
+        jsonObject.put("cert_code",paramMap.get("cert_code"));
+        jsonObject.put("cust_name",paramMap.get("cust_name"));
+        jsonObject.put("opr_date",paramMap.get("opr_date"));
+        jsonObject.put("dep_code",paramMap.get("dep_code"));
         jsonObject.put("file_num","1");
         jsonObject.put("file_check","1");
-        jsonObject.put("source_nos","70,2945|429,2947");
-        jsonObject.put("user_code",Constant.APP_ID);
-        jsonObject.put("app_id","JZYY");
+        jsonObject.put("source_nos",paramMap.get("source_nos"));
+        jsonObject.put("user_code",paramMap.get("user_code"));
+        jsonObject.put("app_id",paramMap.get("app_id"));
         jsonObject.put("action_type","data_inte");
 
         System.out.println(jsonObject.toString());
 
-        String re = HttpUtil.remoteRequest(urlStr,jsonObject.toString());
-        System.out.println("result="+re);
+        String rsData = HttpUtil.remoteRequest(urlStr,jsonObject.toString());
+
+        log.info("事中影像信息提交：" + rsData);
         //{"retcode":"0","retdesc":"提交事中影像信息成功！","ret_code":"0","ret_msg":"提交事中影像信息成功！","retvalue":"提交事中影像信息成功！","check_code":""}
-        return null;
+        return rsData;
     }
 
 
