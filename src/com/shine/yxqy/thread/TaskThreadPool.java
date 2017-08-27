@@ -67,7 +67,7 @@ public class TaskThreadPool {
     }
 
     /**
-     * 将任务加入线程池
+     * 将任务扔给线程池处理
      * @throws Exception
      */
     public static void addTask(UserDocument userDocument) throws Exception {
