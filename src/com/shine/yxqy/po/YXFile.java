@@ -1,17 +1,36 @@
 package com.shine.yxqy.po;
 
 /**
- * ×ÊÁÏ¶ÔÏó
+ * èµ„æ–™å¯¹è±¡
  *
  */
 public class YXFile {
-    private String fileName;    //ÎÄ¼şÃû³Æ
-    private String fileSize;    //ÎÄ¼ş´óĞ¡
-    private String rootPath;    //ÎÄ¼ş¸ùÂ·¾¶
-    private String relaPath;    //ÎÄ¼şÏà¶ÔÂ·¾¶
-    private String fileType;    //ÎÄ¼şÀà±ğ
+    private String fileName;    //æ–‡ä»¶åç§°
+    private String fileSize;    //æ–‡ä»¶å¤§å°
+    private String rootPath;    //æ–‡ä»¶æ ¹è·¯å¾„
+    private String relaPath;    //æ–‡ä»¶ç›¸å¯¹è·¯å¾„
+    private String fileType;    //æ–‡ä»¶ç±»åˆ«
 
+    private String id;//XMLæ–‡ä»¶æ ‡ç­¾ä¸­YXZLå­æ ‡ç­¾ä¸­çš„ID
 
+	private String fileId; // æ–‡ä»¶çš„ID
+
+    public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getFileId() {
+		return fileId;
+	}
+
+	public void setFileID(String fileId) {
+		this.fileId = fileId;
+	}
+    
     public String getFileName() {
         return fileName;
     }
