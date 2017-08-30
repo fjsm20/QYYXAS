@@ -51,7 +51,7 @@ public class DataCollectTask {
                 UserDocument ud = new UserDocument();
                 ud.setCertName(i+"one");
 
-                TaskThreadPool.addTask(ud);
+//                TaskThreadPool.addTask(ud);
             }
 
             System.out.println("one--end");
@@ -59,7 +59,7 @@ public class DataCollectTask {
                 UserDocument ud = new UserDocument();
                 ud.setCertName(i+",two");
 
-                TaskThreadPool.addTask(ud);
+//                TaskThreadPool.addTask(ud);
             }
 
             System.out.println("two--end");

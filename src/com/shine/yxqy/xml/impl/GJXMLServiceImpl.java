@@ -4,6 +4,7 @@ import com.shine.yxqy.po.UserDocument;
 import com.shine.yxqy.xml.XMLService;
 import com.shine.yxqy.util.ConfigUtil;
 import com.shine.yxqy.po.YXFile;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
