@@ -6,38 +6,25 @@ import java.util.List;
  * 用户资料PO类
  */
 public class UserDocument {
-    private String custName;   //客户名称
-    private String certCode;   //证件号码
-    private String certType;   //证件类别
-    private String custId;     //客户号
+    private String custName; // 客户名称
+    private String certCode; // 证件号码
+    private String certType; // 证件类别
+    private String custId; // 客户号
 
+    private String busiCode; //业务代码
+    private String custProp; //客户类型
+    private String acctCode; //账号
+    private String oprDate; //业务时间
+    private String depCode; //业务部门代码
+    private String userCode; //操作员代码
 
-    private String busiCode;   //业务代码
-    private String custProp;   //客户类型
-    private String acctCode;   //账号
-    private String oprDate;    //业务时间
-    private String depCode;    //业务部门代码
-    private String userCode;   //操作员代码
-
-
-
-
-    private List<YXFile> fileList; //文件集合
-
+    private List<YXFile> fileList; // 文件集合
 
     public String getCustName() {
         return custName;
     }
 
     public void setCustName(String custName) {
-        this.custName = custName;
-    }
-
-    public String getCertName() {
-        return custName;
-    }
-
-    public void setCertName(String certName) {
         this.custName = custName;
     }
 
@@ -67,6 +54,10 @@ public class UserDocument {
 
     public List<YXFile> getFileList() {
         return fileList;
+    }
+
+    public void setFileList(List<YXFile> fileList) {
+        this.fileList = fileList;
     }
 
     public String getBusiCode() {
@@ -117,7 +108,4 @@ public class UserDocument {
         this.userCode = userCode;
     }
 
-    public void setFileList(List<YXFile> fileList) {
-        this.fileList = fileList;
-    }
 }
