@@ -1,9 +1,11 @@
 package com.shine.yxqy.xml.impl;
 
 import com.shine.yxqy.po.UserDocument;
-import com.shine.yxqy.xml.XMLService;
-import com.shine.yxqy.util.ConfigUtil;
 import com.shine.yxqy.po.YXFile;
+import com.shine.yxqy.util.ConfigUtil;
+import com.shine.yxqy.xml.XMLService;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -19,19 +21,21 @@ import java.util.List;
  * 国泰君安XML文件解析
  *
  */
-public class GJXMLServiceImpl extends XMLService{
-    private static Logger log = Logger.getLogger(GJXMLServiceImpl.class);
-    
-    private String partOfRelaPath;
+public class GJXMLServiceImpl extends XMLService {
+	private static Logger log = Logger.getLogger(GJXMLServiceImpl.class);
+
+	private String partOfRelaPath;
 	private static String ROOT_PATH = ConfigUtil.getProperty("root_path");
 
-    public void iterateAnalysisXML(String filename, List<UserDocument> listUD) {
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void iterateAnalysisXML(String filename, List<UserDocument> listUD) {
 		log.info("进行XML解析[filename=" + filename + "]");
 		long beginTime = System.currentTimeMillis();
 
 		//截取一部分的相对路径
 		this.setPartOfRelaPath(filename);
-		
+
 		SAXReader saxReader = new SAXReader();
 		try {
 			Document document = saxReader.read(new File(filename));
@@ -65,9 +69,13 @@ public class GJXMLServiceImpl extends XMLService{
 					}
 
 					if (elementInner.getName().contains("YXZL")) {
-						this.setFileDetail(ud, elementInner);
+						this.toFileDetail(ud, elementInner);
 					}
+
 				}
+
+				//剔除YXFile对象字段数据不完整的对象
+				this.dropIncompleteObj(ud);
 				//设置用户文件对象的busi_code
 				ud.setBusiCode(ConfigUtil.getProperty("busi_code"));
 				listUD.add(ud);
@@ -104,7 +112,7 @@ public class GJXMLServiceImpl extends XMLService{
 	 * @param userDoc 用户对象
 	 * @param element xml文件中YXZL或YXZL_SP标签元素
 	 */
-	private void setFileDetail(UserDocument userDoc, Element element) {
+	private void toFileDetail(UserDocument userDoc, Element element) {
 		//迭代器获取YXZL或YXZL_SP标签的子标签元素
 		Iterator<?> eleIt = element.elementIterator();
 		List<YXFile> fileList = userDoc.getFileList();
@@ -139,7 +147,7 @@ public class GJXMLServiceImpl extends XMLService{
 			//设置fileName
 			yf.setFileType(fileList.get(fileList.indexOf(yf)).getFileType());
 			fileList.set(fileList.indexOf(yf), yf);
-			
+
 		} else if ("YXZL_SP".equals(element.getName())) {
 			//YXZL_SP标签下信息数据直接添加到fileList中
 			yf.setFileType("VIDEO");
@@ -154,7 +162,7 @@ public class GJXMLServiceImpl extends XMLService{
 			beginIndex = ROOT_PATH.length();
 		}
 		int endIndex = tmp.lastIndexOf("cust.xml");
-		
+
 		tmp = tmp.substring(beginIndex, endIndex);
 		if (StringUtils.isNotEmpty(tmp)) {
 			this.partOfRelaPath = tmp;
@@ -163,19 +171,19 @@ public class GJXMLServiceImpl extends XMLService{
 		}
 	}
 
+	/**
+	 * 去掉数据不完整的YXFile对象，只有ID和FileType没有其他的信息的YXFile对象需要被剔除
+	 * @param userDoc 用户文件对象
+	 */
+	private void dropIncompleteObj(UserDocument userDoc) {
+		List<YXFile> fileList = userDoc.getFileList();
 
+		for (int i = fileList.size() - 1; i >= 0; i--) {
+			YXFile yf = fileList.get(i);
+			if (StringUtils.isEmpty(yf.getFileName())) {
+				fileList.remove(i);
+			}
+		}
+	}
 
-
-
-    public static void main(String args[]){
-        XMLService service = new GJXMLServiceImpl();
-        List<UserDocument> listUD = new ArrayList<UserDocument>();
-        service.iterateAnalysisXML("D:\\test\\cust.xml",listUD);
-        for(UserDocument ud: listUD) {
-            System.out.println("------------");
-            System.out.println(ud.getCertName());
-            System.out.println(ud.getCertCode());
-        }
-
-    }
 }
