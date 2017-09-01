@@ -14,12 +14,21 @@
         <property name="targetMethod" value="requestLifeCtrl"/>
         <property name="concurrent" value="false"/>
     </bean>
+       <bean id="readingJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="dataCollectTask" />
+		<property name="targetMethod" value="readingFile" />
+		<property name="concurrent" value="false" />
+	</bean>
 
     <bean id="requestTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
         <property name="jobDetail" ref="requestJobDetail"/>
         <property name="cronExpression" value="0/5 * * * * ?"/>
     </bean>
-
+    <bean id="readingTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="readingJobDetail" />
+		<property name="cronExpression" value="0/6 * * * * ?" />
+    </bean>
 
     <!--调度工厂-->
     <bean id="springJobSchedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
