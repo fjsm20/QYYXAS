@@ -1,7 +1,7 @@
 package com.shine.yxqy.util;
 
 /**
- * ³£Á¿¹¤¾ßÀà
+ * 常量
  * Created by xiew on 2017-08-25.
  */
 public class Constant {
