@@ -3,7 +3,7 @@ package com.shine.yxqy.util;
 import java.util.Properties;
 
 /**
- * ÅäÖÃÎÄ¼þ¹¤¾ßÀà
+ * 配置文件工具类
  * Created by xiew on 2017-08-25.
  */
 public class ConfigUtil {
