@@ -3,6 +3,7 @@ package com.shine.yxqy.util;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -126,6 +127,7 @@ public class FileUtil {
     }
 
 
+
     /**
      * 获取项目的class级别绝对路径：例如 D:/Tomcat7/webapps/EeamsWeb/WEB-INF/classes/
      * @return
@@ -173,6 +175,8 @@ public class FileUtil {
         }
         return property;
     }
+
+
 
 
 }

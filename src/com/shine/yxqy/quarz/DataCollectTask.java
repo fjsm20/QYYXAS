@@ -1,10 +1,15 @@
 package com.shine.yxqy.quarz;
 
-import com.shine.yxqy.po.UserDocument;
-import com.shine.yxqy.thread.TaskThreadPool;
+import com.shine.yxqy.util.ConfigUtil;
 import com.shine.yxqy.util.Constant;
+import com.shine.yxqy.util.FileUtil;
+import com.shine.yxqy.util.FtpUtil;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,21 +51,15 @@ public class DataCollectTask {
             jsonObject.put("action_type","data_inte");
 
 //            ServiceUtil.submitProcScanInfo(null);
+//
+//            for(int  i=0; i<=10;i++){
+//                UserDocument ud = new UserDocument();
+////                ud.setCertName(i+"one");
+//
+////                TaskThreadPool.addTask(ud);
+//            }
 
-            for(int  i=0; i<=10;i++){
-                UserDocument ud = new UserDocument();
-                ud.setCertName(i+"one");
 
-//                TaskThreadPool.addTask(ud);
-            }
-
-            System.out.println("one--end");
-            for(int  i=0; i<=10;i++){
-                UserDocument ud = new UserDocument();
-                ud.setCertName(i+",two");
-
-//                TaskThreadPool.addTask(ud);
-            }
 
             System.out.println("two--end");
 

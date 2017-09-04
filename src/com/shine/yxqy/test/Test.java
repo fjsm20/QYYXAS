@@ -8,10 +8,8 @@ import com.shine.yxqy.util.FileUtil;
 import com.shine.yxqy.util.FtpUtil;
 import org.apache.commons.net.ftp.FTPFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.List;
 
 public class Test {
     public static void main(String[] args) {
@@ -38,8 +36,10 @@ public class Test {
 
             /***ftp 请求***/
             String addr = "ftp://administrator:gtja@2016@10.189.145.56:2122/";
-            final String  ftpFile =  "/wd";
+            final String  ftpFile =  "/91";
+            final String localFile= "D://test//";
 //            addr = ConfigUtil.getProperty(Constant.FTP_URL);
+            long sTime = System.currentTimeMillis();
             System.out.println(addr);
 //            FtpUtil.getFile(addr, ftpFile,new FtpUtil.FtpCallback() {
 //                @Override
@@ -69,12 +69,40 @@ public class Test {
 //                }
 //            });
 
+
+
+
+            FtpUtil.getDirFiles(addr, ftpFile,localFile,new FtpUtil.FtpCallback() {
+                @Override
+                public void postSend() {
+//                    logger.debug("[FTP]正在发起下载文件请求");
+                }
+
+                @Override
+                public void onReceive(List<FtpUtil.FFile> fFileList) throws IOException {
+                    if(fFileList ==null &&  fFileList.size()>=1){
+                        throw new IOException("没有需要下载的文件");
+                    }
+                    System.out.println("解析结束，总共文件下载:size="+fFileList.size());
+//                    for (FtpUtil.FFile fFile : fFileList) {
+//                        System.out.println("结果分析：" + fFile.getRelapath() + "/" + fFile.getFileName() + ",size=" + fFile.getFileSize());
+//                    }
+                }
+
+                @Override
+                public void onException(Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            long eTime = System.currentTimeMillis();
+            System.out.println("耗时："+(eTime-sTime));
+
 //            downloadDirFiles("A","D://test/123//","345");
-
-             boolean flag = FtpUtil.getDirFiles(addr,"",new FtpUtil.FtpCallback(){
-
-             });
-            System.out.println("结果："+flag);
+//
+//            boolean flag = FtpUtil.getDirFiles(addr,"",new FtpUtil.FtpCallback(){
+//
+//            });
+//            System.out.println("结果："+flag);
 
 //            /****上传文件***/
 //            /****上传文件***/
@@ -88,82 +116,83 @@ public class Test {
 
     }
 
-
     /**
-     * 获取整个文件夹及其文件
      *
-     * @param remotePath 文件夹名称（abc 或者 /1/2/abc）
+     * 下载FTP文件
+     * 当你需要下载FTP文件的时候，调用此方法
+     * 根据<b>获取的文件名，本地地址，远程地址</b>进行下载
+     *
+     * @param ftpFile
+     * @param relativeLocalPath
+     * @param relativeRemotePath
      */
-    //本方法用于下载FTP上的目录结构到本地中
-    public static void downloadDirFiles(String remotePath, String rootPath, String relaPath) throws IOException {
-        if (remotePath != null && !remotePath.equals("")) {
-            try {
-                FtpUtil.ftpLogin("10.189.145.56", 2122, "administrator", "gtja@2016");
-                FtpUtil.ftpClient.changeWorkingDirectory("A");
-                FTPFile[] ftpFiles = FtpUtil.ftpClient.listFiles();
-                if (ftpFiles != null && ftpFiles.length > 0) {
-                    for (int i = 0; i < ftpFiles.length; i++) {
-                        System.out.println("fileName="+ftpFiles[i].getName()+",》="+ftpFiles[i].isFile());
-                    }
-                }
-                System.out.println(ftpFiles.length);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }finally {
-                FtpUtil.ftpLogout();
-            }
-
-
-//            //在本地建立一个相同的文件目录
-//            File localFile = new File(rootPath + File.separator + relaPath);
-//            localFile.mkdirs();
-//            String localPath = localFile.getAbsolutePath();
-//            System.out.println(localPath);
-//            //获得FTPFile对象数组
-//            FTPFile[] ftpFiles = ftpClient.listFiles();
-//            if (ftpFiles != null && ftpFiles.length > 0) {
-//                for (int i = 0; i < ftpFiles.length; i++) {
-//                    FTPFile subFile = ftpFiles[i];
-//                    if (subFile.isDirectory()) {
-//                        String tmpRemotepath = remotePath + File.separator + subFile.getName();
-//                        downloadDirFiles(tmpRemotepath, rootPath, subFile.getName());
-//                    } else {
-//                        downloadFileFromFtp(remotePath, subFile.getName());
+//    private  static void downloadFile(FTPFile ftpFile, String relativeLocalPath,String relativeRemotePath) {
+//        if (ftpFile.isFile()) {
+//            if (ftpFile.getName().indexOf("?") == -1) {
+//                OutputStream outputStream = null;
+//                try {
+//                    File locaFile= new File(relativeLocalPath+ ftpFile.getName());
+//                    //判断文件是否存在，存在则返回
+//                    if(locaFile.exists()){
+//                        return;
+//                    }else{
+//                        outputStream = new FileOutputStream(relativeLocalPath+ ftpFile.getName());
+//                        ftp.retrieveFile(ftpFile.getName(), outputStream);
+//                        outputStream.flush();
+//                        outputStream.close();
+//                    }
+//                } catch (Exception e) {
+//                    System.out.println(e);
+//                } finally {
+//                    try {
+//                        if (outputStream != null){
+//                            outputStream.close();
+//                        }
+//                    } catch (IOException e) {
+//                        System.out.println(e);
 //                    }
 //                }
 //            }
-        }
-
-    }
-
-//    /**
-//     * 方法用于从FTP服务器中下载文件
-//     *
-//     * @param remotePath :下载文件所处FTP中路径
-//     * @param fileName :下载的文件名称
-//     * @param outputSream :下载文件的输出流对象
-//     *
-//     * @return boolean :表示是否上传成功
-//     *
-//     */
-//    public static boolean downloadFileFromFtp(String remotePath, String fileName) {
-//        boolean bool = false;
-//        try {
-//            ftpClient.changeWorkingDirectory(remotePath);
-//            FTPFile[] ftpFile = ftpClient.listFiles();
-//            for (int i = 0; i < ftpFile.length; i++) {
-//                if (fileName.equals(ftpFile[i].getName())) {
-//                    InputStream is = ftpClient.retrieveFileStream(fileName);
-//                    FileUtil.write("D://test//123/",fileName,is);
-//                }
+//        } else {
+//            String newlocalRelatePath = relativeLocalPath + ftpFile.getName();
+//            String newRemote = new String(relativeRemotePath+ ftpFile.getName().toString());
+//            File fl = new File(newlocalRelatePath);
+//            if (!fl.exists()) {
+//                fl.mkdirs();
 //            }
-//            bool = true;
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            bool = false;
-//        } catch (Exception e) {
-//            e.printStackTrace();
+//            try {
+//                newlocalRelatePath = newlocalRelatePath + '/';
+//                newRemote = newRemote + "/";
+//                String currentWorkDir = ftpFile.getName().toString();
+//                boolean changedir = ftp.changeWorkingDirectory(currentWorkDir);
+//                if (changedir) {
+//                    FTPFile[] files = null;
+//                    files = ftp.listFiles();
+//                    for (int i = 0; i < files.length; i++) {
+//                        downloadFile(files[i], newlocalRelatePath, newRemote);
+//                    }
+//                }
+//                if (changedir){
+//                    ftp.changeToParentDirectory();
+//                }
+//            } catch (Exception e) {
+//                logger.error(e);
+//            }
 //        }
-//        return bool;
 //    }
+//
+//
+//    public static void main(String[] args) throws Exception{
+//        Ftp f=new Ftp();
+//        f.setIpAddr("1111");
+//        f.setUserName("root");
+//        f.setPwd("111111");
+//        FtpUtil.connectFtp(f);
+//        File file = new File("F:/test/com/test/Testng.java");
+//        FtpUtil.upload(file);//把文件上传在ftp上
+//        FtpUtil.startDown(f, "e:/",  "/xxtest");//下载ftp文件测试
+//        System.out.println("ok");
+//
+//    }
+
 }

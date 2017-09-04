@@ -7,10 +7,10 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +25,13 @@ public class FtpUtil {
     public static FTPClient ftpClient;
 
     /**
-     * 获取整个文件夹及其文件
-     *
-     * @param remotePath 文件夹名称（abc 或者 /1/2/abc）
+     * 获取整个文件夹及其文件（用于下载FTP上的目录结构到本地中）
+     * @param url FTP的URL：ftp://ftpuser:123321@127.0.0.1:21/33
+     * @param remotePath FTP待下载的文件夹（abc 或者 /1/2/abc）
+     * @param localPath  存放本地路径（C://ABC//102）
+     * @param listener 回调函数
      */
-    //本方法用于下载FTP上的目录结构到本地中
-    public static boolean getDirFiles(String url,String remotePath,FtpUtil.FtpListener listener) throws IOException {
+    public static boolean getDirFiles(String url,String remotePath,String localPath,FtpUtil.FtpListener listener) throws IOException {
         boolean doFlag = false;
         Map<String, Object> param;
         FtpHelper ftpHelper = new FtpHelper(listener);
@@ -43,82 +44,84 @@ public class FtpUtil {
 
             ftpHelper.beforeConnect();
             ftpLogin(ip, port, username, password);
+            System.out.println("FTP登入成功");
             ftpHelper.onConnect();
 
             List<FFile> fFileList = new ArrayList<FFile>();
 
             if (ftpClient != null) {
-                iterateFTPDir(remotePath, remotePath, fFileList);
-                doFlag= true;
-                for (FFile fFile : fFileList) {
-                    System.out.println("结果分析：" + fFile.relapath + "/" + fFile.fileName + ",size=" + fFile.getFileSize());
+                if(remotePath.contains(".")) {
+                    System.out.println("不是有效文件路径");
+                }else {
+                    ftpClient.changeWorkingDirectory(new String(remotePath.getBytes("gbk"), "iso-8859-1"));
+                    localPath = localPath+"/"+remotePath;
+                    iterateFTPDir(localPath,  fFileList);
+                    doFlag = true;
+                    ftpHelper.onReceive(fFileList);
                 }
-//                if(ftpClient.changeWorkingDirectory(remotePath)){
-//                    FTPFile[] ftpFiles = ftpClient.listFiles();
-//                    if (ftpFiles != null && ftpFiles.length > 0) {
-//                        for (int i = 0; i < ftpFiles.length; i++) {
-//                            FTPFile file = ftpFiles[i];
-//                            if(file.isFile()){
-//                                fFileList.add(new FFile(remotePath,file.getName(),file.getSize()));
-//                                System.out.println("fileName="+file.getName()+",》="+file.isFile());
-//                            }else{
-//                                getDirFiles(url,remotePath+File.separator+file.getName(),listener);
-//                            }
-//                        }
-//
-//                        for(FFile fFile:fFileList){
-//                            System.out.println(fFile.relapath+File.separator+fFile.fileName+",size="+fFile.getFileSize());
-//                        }
-//                    }else{
-//                        log.info("目录没有需要下载的文件："+remotePath);
-//                    }
-//
-//
-//                }else{
-//                    log.info("FTP切换目录失败："+remotePath);
-//                }
-
             }
-
-
 
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            System.out.println("登出");
+            ftpLogout();
         }
         return doFlag;
 
     }
 
-    public static void iterateFTPDir(String rootPath,String relaPath,List<FFile> fFileList) throws IOException {
-        boolean flag = false;
-        try{
-            System.out.println("当前目录1："+new String(ftpClient.printWorkingDirectory().getBytes("iso-8859-1"),"gbk"));
-            flag=  ftpClient.changeWorkingDirectory(rootPath);
-            flag=  ftpClient.changeWorkingDirectory(new String(relaPath.getBytes("gbk"),"iso-8859-1"));
-            System.out.println("当前目录2："+new String(ftpClient.printWorkingDirectory().getBytes("iso-8859-1"),"gbk")+" ,FTP切换目录："+relaPath);
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        if(flag){
+    /**
+     * 迭代遍历文件夹
+     *
+     * @param localPath  ftp根路径
+     * @param relaPath  ftp相对路径
+     * @param fFileList 存放遍历文件结果
+     * @throws IOException
+     */
+    public static void iterateFTPDir(String localPath, List<FFile> fFileList) throws IOException {
+        OutputStream outputStream =null;
+        try {
             FTPFile[] ftpFiles = ftpClient.listFiles();
             if (ftpFiles != null && ftpFiles.length > 0) {
                 for (int i = 0; i < ftpFiles.length; i++) {
                     FTPFile file = ftpFiles[i];
-                    if(file.isFile()){
-                        fFileList.add(new FFile(relaPath,file.getName(),file.getSize()));
-                    }else{
-                        String tmpPath = relaPath+"/"+new String((file.getName()).getBytes("iso-8859-1"),"gbk")+"/";
-                        iterateFTPDir(rootPath,tmpPath,fFileList);
+                    if (file.isFile()) {
+                        FileUtil.insureDirExist(localPath);
+                        try {
+                            outputStream = new FileOutputStream(localPath + "/" + file.getName());
+                            System.out.println(new String((localPath + "/" + file.getName()).getBytes("iso-8859-1"), "gbk"));
+                        }catch (Exception e){
+                            System.out.println("FTP获取的文件名为非法路径："+new String(file.getName().getBytes("iso-8859-1"), "gbk"));
+                            e.printStackTrace();
+                            continue;
+                        }
+                        ftpClient.retrieveFile(file.getName(), outputStream);
+                        fFileList.add(new FFile("", file.getName(), file.getSize()));
+                    } else {
+                        String tmp = new String((file.getName()).getBytes("iso-8859-1"), "gbk");
+                        System.out.println("--迭代目录：" + tmp);
+                        ftpClient.changeWorkingDirectory(file.getName().toString());
+                        localPath = localPath + "/" + tmp;
+                        iterateFTPDir(localPath,  fFileList);
+                        Thread.sleep(10);
+                        ftpClient.changeToParentDirectory();
+                        localPath = localPath.substring(0,localPath.lastIndexOf("/"));
+                        System.out.println("--返回父层:"+tmp);
+
                     }
                 }
-            }else{
-                System.out.println("目录没有需要下载的文件："+relaPath);
-                log.info("目录没有需要下载的文件："+relaPath);
+            } else {
+                System.out.println("目录没有需要下载的文件："  );
+//                log.info("目录没有需要下载的文件：" + relaPath);
             }
-        }else{
-            System.out.println("当前目录："+new String(ftpClient.printWorkingDirectory().getBytes("iso-8859-1"),"gbk")+" ,FTP切换目录失败："+relaPath);
-            log.info("FTP切换目录失败："+relaPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if(outputStream !=null){
+                outputStream.flush();
+                outputStream.close();
+            }
         }
 
     }
@@ -254,6 +257,9 @@ public class FtpUtil {
         void postSend();
 
         void onReceive(InputStream inStream) throws IOException;
+
+        void onReceive(List<FFile> fFileList) throws Exception;
+
     }
 
     /**
@@ -292,6 +298,11 @@ public class FtpUtil {
 
         @Override
         public void onReceive(InputStream inStream) throws IOException {
+
+        }
+
+        @Override
+        public void onReceive(List<FFile> fFileList) throws Exception {
 
         }
     }
@@ -375,6 +386,17 @@ public class FtpUtil {
         }
 
         /**
+         * 接收到请求响应时触发
+         *
+         * @param inStream InputStream
+         */
+        public void onReceive(List<FFile> fFileList) throws Exception {
+            if (isConnect && !isBroken) {
+                listener.onReceive(fFileList);
+            }
+        }
+
+        /**
          * 任意时刻发生异常时触发
          *
          * @param e Exception
@@ -393,7 +415,7 @@ public class FtpUtil {
     /**
      * FTP文件自定义FILE类
      */
-    private static class FFile{
+    public static class FFile{
         private String fileName;
         private Long fileSize;
         private String relapath;
