@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * FTPå·¥å…·åŒ…
+ * FTP¹¤¾ß°ü
  * Created by xiew on 2017/5/24.
  */
 public class FtpUtil {
@@ -25,11 +25,11 @@ public class FtpUtil {
     public static FTPClient ftpClient;
 
     /**
-     * è·å–æ•´ä¸ªæ–‡ä»¶å¤¹åŠå…¶æ–‡ä»¶ï¼ˆç”¨äºä¸‹è½½FTPä¸Šçš„ç›®å½•ç»“æ„åˆ°æœ¬åœ°ä¸­ï¼‰
-     * @param url FTPçš„URLï¼šftp://ftpuser:123321@127.0.0.1:21/33
-     * @param remotePath FTPå¾…ä¸‹è½½çš„æ–‡ä»¶å¤¹ï¼ˆabc æˆ–è€… /1/2/abcï¼‰
-     * @param localPath  å­˜æ”¾æœ¬åœ°è·¯å¾„ï¼ˆC://ABC//102ï¼‰
-     * @param listener å›è°ƒå‡½æ•°
+     * »ñÈ¡Õû¸öÎÄ¼ş¼Ğ¼°ÆäÎÄ¼ş£¨ÓÃÓÚÏÂÔØFTPÉÏµÄÄ¿Â¼½á¹¹µ½±¾µØÖĞ£©
+     * @param url FTPµÄURL£ºftp://ftpuser:123321@127.0.0.1:21/33
+     * @param remotePath FTP´ıÏÂÔØµÄÎÄ¼ş¼Ğ£¨abc »òÕß /1/2/abc£©
+     * @param localPath  ´æ·Å±¾µØÂ·¾¶£¨C://ABC//102£©
+     * @param listener »Øµ÷º¯Êı
      */
     public static boolean getDirFiles(String url,String remotePath,String localPath,FtpUtil.FtpListener listener) throws IOException {
         boolean doFlag = false;
@@ -44,14 +44,14 @@ public class FtpUtil {
 
             ftpHelper.beforeConnect();
             ftpLogin(ip, port, username, password);
-            System.out.println("FTPç™»å…¥æˆåŠŸ");
+            System.out.println("FTPµÇÈë³É¹¦");
             ftpHelper.onConnect();
 
             List<FFile> fFileList = new ArrayList<FFile>();
 
             if (ftpClient != null) {
                 if(remotePath.contains(".")) {
-                    System.out.println("ä¸æ˜¯æœ‰æ•ˆæ–‡ä»¶è·¯å¾„");
+                    System.out.println("²»ÊÇÓĞĞ§ÎÄ¼şÂ·¾¶");
                 }else {
                     ftpClient.changeWorkingDirectory(new String(remotePath.getBytes("gbk"), "iso-8859-1"));
                     localPath = localPath+"/"+remotePath;
@@ -64,7 +64,7 @@ public class FtpUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            System.out.println("ç™»å‡º");
+            System.out.println("µÇ³ö");
             ftpLogout();
         }
         return doFlag;
@@ -72,11 +72,11 @@ public class FtpUtil {
     }
 
     /**
-     * è¿­ä»£éå†æ–‡ä»¶å¤¹
+     * µü´ú±éÀúÎÄ¼ş¼Ğ
      *
-     * @param localPath  ftpæ ¹è·¯å¾„
-     * @param relaPath  ftpç›¸å¯¹è·¯å¾„
-     * @param fFileList å­˜æ”¾éå†æ–‡ä»¶ç»“æœ
+     * @param localPath  ftp¸ùÂ·¾¶
+     * @param relaPath  ftpÏà¶ÔÂ·¾¶
+     * @param fFileList ´æ·Å±éÀúÎÄ¼ş½á¹û
      * @throws IOException
      */
     public static void iterateFTPDir(String localPath, List<FFile> fFileList) throws IOException {
@@ -89,10 +89,10 @@ public class FtpUtil {
                     if (file.isFile()) {
                         FileUtil.insureDirExist(localPath);
                         try {
-                            outputStream = new FileOutputStream(localPath + "/" + file.getName());
+                            outputStream = new FileOutputStream(localPath + "/" + new String(file.getName().getBytes("iso-8859-1"), "gbk"));
                             System.out.println(new String((localPath + "/" + file.getName()).getBytes("iso-8859-1"), "gbk"));
                         }catch (Exception e){
-                            System.out.println("FTPè·å–çš„æ–‡ä»¶åä¸ºéæ³•è·¯å¾„ï¼š"+new String(file.getName().getBytes("iso-8859-1"), "gbk"));
+                            System.out.println("FTP»ñÈ¡µÄÎÄ¼şÃûÎª·Ç·¨Â·¾¶£º"+new String(file.getName().getBytes("iso-8859-1"), "gbk"));
                             e.printStackTrace();
                             continue;
                         }
@@ -100,20 +100,20 @@ public class FtpUtil {
                         fFileList.add(new FFile("", file.getName(), file.getSize()));
                     } else {
                         String tmp = new String((file.getName()).getBytes("iso-8859-1"), "gbk");
-                        System.out.println("--è¿­ä»£ç›®å½•ï¼š" + tmp);
+                        System.out.println("--µü´úÄ¿Â¼£º" + tmp);
                         ftpClient.changeWorkingDirectory(file.getName().toString());
                         localPath = localPath + "/" + tmp;
                         iterateFTPDir(localPath,  fFileList);
                         Thread.sleep(10);
                         ftpClient.changeToParentDirectory();
                         localPath = localPath.substring(0,localPath.lastIndexOf("/"));
-                        System.out.println("--è¿”å›çˆ¶å±‚:"+tmp);
+                        System.out.println("--·µ»Ø¸¸²ã:"+tmp);
 
                     }
                 }
             } else {
-                System.out.println("ç›®å½•æ²¡æœ‰éœ€è¦ä¸‹è½½çš„æ–‡ä»¶ï¼š"  );
-//                log.info("ç›®å½•æ²¡æœ‰éœ€è¦ä¸‹è½½çš„æ–‡ä»¶ï¼š" + relaPath);
+                System.out.println("Ä¿Â¼Ã»ÓĞĞèÒªÏÂÔØµÄÎÄ¼ş£º"  );
+//                log.info("Ä¿Â¼Ã»ÓĞĞèÒªÏÂÔØµÄÎÄ¼ş£º" + relaPath);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -128,11 +128,13 @@ public class FtpUtil {
  
 
     /**
-     * è·å–æ–‡ä»¶
-     *
-     * @param url
+     * »ñÈ¡ÎÄ¼ş
+     * @param url ftpµØÖ·
+     * @param relaPath ftpÏà¶ÔÂ·¾¶
+     * @param ftpFile ÎÄ¼şÃû³Æ
+     * @param listener »Øµ÷º¯Êı
      */
-    public static void getFile(String url, String ftpFile, FtpListener listener) throws Exception {
+    public static void getFile(String url,String relaPath, String ftpFile, FtpListener listener) throws Exception {
         Map<String, Object> param;
         InputStream is;
         FtpHelper ftpHelper = new FtpHelper(listener);
@@ -148,18 +150,21 @@ public class FtpUtil {
             ftpHelper.onConnect();
 
             if (ftpClient != null) {
+                if(StringUtils.isNotEmpty(relaPath)){
+                    ftpClient.changeWorkingDirectory(relaPath);
+                }
                 is = ftpClient.retrieveFileStream(ftpFile);
                 Thread.sleep(100);
                 if (is == null) {
-                    throw new Exception("æµä¸ºç©ºï¼šftpFile=" + ftpFile);
+                    throw new Exception("Á÷Îª¿Õ£ºftpFile=" + ftpFile);
                 }
-                ftpHelper.onReceive(is);
+                ftpHelper.onReceive(is,relaPath);
             }
 
 
         } catch (Exception e) {
             ftpHelper.onException(e);
-            log.error("FTPè·å–æ–‡ä»¶å¤±è´¥," + e.getMessage());
+            log.error("FTP»ñÈ¡ÎÄ¼şÊ§°Ü," + e.getMessage());
             throw new Exception(e);
         } finally {
             ftpLogout();
@@ -167,7 +172,7 @@ public class FtpUtil {
     }
 
     /**
-     * ç™»å½•
+     * µÇÂ¼
      *
      * @param url
      * @param port
@@ -188,18 +193,18 @@ public class FtpUtil {
             if (!ftpClient.login(username, password)) {
                 ftpClient.disconnect();
                 ftpClient = null;
-                throw new Exception("FPTå°è¯•ç™»å½•å¤±è´¥");
+                throw new Exception("FPT³¢ÊÔµÇÂ¼Ê§°Ü");
             }
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
 
         } catch (Exception e) {
-            log.error("FTPè¿æ¥ç™»å½•å¼‚å¸¸ï¼š" + e.getMessage());
+            log.error("FTPÁ¬½ÓµÇÂ¼Òì³££º" + e.getMessage());
             throw e;
         }
     }
 
     /**
-     * FTPç™»å‡º
+     * FTPµÇ³ö
      */
     public static void ftpLogout() {
         if (ftpClient != null && ftpClient.isConnected()) {
@@ -207,16 +212,16 @@ public class FtpUtil {
                 ftpClient.logout();
                 ftpClient.disconnect();
             } catch (IOException e) {
-                log.error("FTPç™»å‡ºå¼‚å¸¸ï¼š" + e.getMessage());
+                log.error("FTPµÇ³öÒì³££º" + e.getMessage());
             }
         }
     }
     
     /**
-	 * è·å¾—FTPæœåŠ¡å™¨ä¸ŠæŒ‡å®šç›®å½•çš„æ–‡ä»¶åˆ—è¡¨åŒ…æ‹¬æ–‡ä»¶å’Œæ–‡ä»¶å¤¹
-	 * @param ftpUrl ä¾‹å¦‚ftp://username:password@ip:port
-	 * @param path ftpæœåŠ¡å™¨æ–‡ä»¶è·¯å¾„
-	 * @return è¿”å›FTPFileçš„æ•°ç»„
+	 * »ñµÃFTP·şÎñÆ÷ÉÏÖ¸¶¨Ä¿Â¼µÄÎÄ¼şÁĞ±í°üÀ¨ÎÄ¼şºÍÎÄ¼ş¼Ğ
+	 * @param ftpUrl ÀıÈçftp://username:password@ip:port
+	 * @param path ftp·şÎñÆ÷ÎÄ¼şÂ·¾¶
+	 * @return ·µ»ØFTPFileµÄÊı×é
 	 */
 	public static FTPFile[] listFiles(String ftpUrl, String path) {
 		Map<String, Object> param;
@@ -260,10 +265,12 @@ public class FtpUtil {
 
         void onReceive(List<FFile> fFileList) throws Exception;
 
+        void onReceive(InputStream inStream,String relaPath) throws Exception;
+
     }
 
     /**
-     * å›è°ƒå‡½æ•°
+     * »Øµ÷º¯Êı
      */
     public static class FtpCallback implements FtpListener {
         @Override
@@ -305,6 +312,11 @@ public class FtpUtil {
         public void onReceive(List<FFile> fFileList) throws Exception {
 
         }
+
+        @Override
+        public void onReceive(InputStream inStream,String relaPath) throws Exception {
+
+        }
     }
 
 
@@ -320,11 +332,11 @@ public class FtpUtil {
 
 
         /**
-         * æ‰“å¼€è¿æ¥å‰è§¦å‘
-         * è§£æftpçš„URLï¼šftp://ftpuser:123321@127.0.0.1:21/33
-         * æ³¨æ„ï¼šå¦‚æœæœ‰ç›¸å¯¹è·¯å¾„ï¼Œåªå…è®¸'/'
+         * ´ò¿ªÁ¬½ÓÇ°´¥·¢
+         * ½âÎöftpµÄURL£ºftp://ftpuser:123321@127.0.0.1:21/33
+         * ×¢Òâ£ºÈç¹ûÓĞÏà¶ÔÂ·¾¶£¬Ö»ÔÊĞí'/'
          *
-         * @param url è¯·æ±‚åœ°å€
+         * @param url ÇëÇóµØÖ·
          */
         public Map<String, Object> beforeOpenConnect(String url) {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -334,7 +346,7 @@ public class FtpUtil {
                 String username = url.substring(6, url.indexOf(":", 4));
                 String password = url.substring(url.indexOf(":", 4) + 1, url.lastIndexOf("@"));
                 String ip = url.substring(url.lastIndexOf("@") + 1, url.lastIndexOf(":"));
-                //åˆ¤æ–­æœ€åä¸€ä¸ª/çš„ä½ç½®
+                //ÅĞ¶Ï×îºóÒ»¸ö/µÄÎ»ÖÃ
                 int port = 21;
                 int index = url.lastIndexOf("/");
                 if (index > 5) {
@@ -353,21 +365,21 @@ public class FtpUtil {
 
 
         /**
-         * å»ºç«‹è¿æ¥å‰è§¦å‘
+         * ½¨Á¢Á¬½ÓÇ°´¥·¢
          */
         public void beforeConnect() {
             isConnectOpened = true;
         }
 
         /**
-         * å»ºç«‹è¿æ¥åè§¦å‘
+         * ½¨Á¢Á¬½Óºó´¥·¢
          */
         public void onConnect() {
             isConnect = true;
         }
 
         /**
-         * è¯·æ±‚æ•°æ®å‘é€ç»“æŸåè§¦å‘
+         * ÇëÇóÊı¾İ·¢ËÍ½áÊøºó´¥·¢
          */
         public void postSend() {
             if (isConnected())
@@ -375,7 +387,7 @@ public class FtpUtil {
         }
 
         /**
-         * æ¥æ”¶åˆ°è¯·æ±‚å“åº”æ—¶è§¦å‘
+         * ½ÓÊÕµ½ÇëÇóÏìÓ¦Ê±´¥·¢
          *
          * @param inStream InputStream
          */
@@ -386,9 +398,9 @@ public class FtpUtil {
         }
 
         /**
-         * æ¥æ”¶åˆ°è¯·æ±‚å“åº”æ—¶è§¦å‘
+         * ½ÓÊÕµ½ÇëÇóÏìÓ¦Ê±´¥·¢
          *
-         * @param inStream InputStream
+         * @param fFileList
          */
         public void onReceive(List<FFile> fFileList) throws Exception {
             if (isConnect && !isBroken) {
@@ -397,7 +409,18 @@ public class FtpUtil {
         }
 
         /**
-         * ä»»æ„æ—¶åˆ»å‘ç”Ÿå¼‚å¸¸æ—¶è§¦å‘
+         * ½ÓÊÕµ½ÇëÇóÏìÓ¦Ê±´¥·¢
+         *
+         * @param relaPath Ïà¶ÔÂ·¾¶
+         */
+        public void onReceive(InputStream inStream,String relaPath) throws Exception {
+            if (isConnect && !isBroken) {
+                listener.onReceive(inStream,relaPath);
+            }
+        }
+
+        /**
+         * ÈÎÒâÊ±¿Ì·¢ÉúÒì³£Ê±´¥·¢
          *
          * @param e Exception
          */
@@ -413,7 +436,7 @@ public class FtpUtil {
     }
 
     /**
-     * FTPæ–‡ä»¶è‡ªå®šä¹‰FILEç±»
+     * FTPÎÄ¼ş×Ô¶¨ÒåFILEÀà
      */
     public static class FFile{
         private String fileName;

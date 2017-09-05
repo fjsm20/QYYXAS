@@ -1,17 +1,18 @@
 package com.shine.yxqy.quarz;
 
+import com.shine.yxqy.thread.TaskThreadPool;
 import com.shine.yxqy.util.ConfigUtil;
 import com.shine.yxqy.util.Constant;
-import com.shine.yxqy.util.FileUtil;
 import com.shine.yxqy.util.FtpUtil;
+import com.shine.yxqy.util.HttpUtil;
+import net.sf.json.JSONObject;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DataCollectTask {
@@ -19,139 +20,194 @@ public class DataCollectTask {
 
 
     public void requestLifeCtrl() {
-        log.info("æ‰§è¡Œè°ƒåº¦ä»»åŠ¡");
-        System.out.println("æ‰§è¡Œè°ƒåº¦ä»»åŠ¡ï¼š"+new Date());
-        String token = null;
-        try {
-//            token = ServiceUtil.getRemoteBusToken();
-            System.out.println("token="+token);
+		String wt_ip=ConfigUtil.getProperty(Constant.WT_IP);
+		String operateTime = ConfigUtil.getParamProperty(Constant.OPERATE_TIME);
+		String dateType = "0"; //0:¿ª»§  1£ºÒµÎñ°ìÀí
+    	try{
 
-//            /****ä¸Šä¼ æ–‡ä»¶***/
-//            File file = new File("D:\\test\\aaf.pdf");
-////
-//            String data = ServiceUtil.doUploadFile(file.getName(),"2017001",file);
-//            System.out.println("æ‰§è¡Œç»“æœï¼š"+data);
-
-            Map<String,String> jsonObject = new HashMap<String,String>();
-            jsonObject.put("method_id","020123");
-            jsonObject.put("src_order_no","XY0012229");
-            jsonObject.put("busi_code","2100500000");
-            jsonObject.put("cust_prop","0");
-            jsonObject.put("acct_code","10000000911");
-            jsonObject.put("cert_type","0");
-            jsonObject.put("cert_code","1122331");
-            jsonObject.put("cust_name","å¼ ä¸‰");
-            jsonObject.put("opr_date","20170826");
-            jsonObject.put("dep_code","3106");
-            jsonObject.put("file_num","1");
-            jsonObject.put("file_check","1");
-            jsonObject.put("source_nos","70,2945|429,2947");
-            jsonObject.put("user_code", Constant.APP_ID);
-            jsonObject.put("app_id","JZYY");
-            jsonObject.put("action_type","data_inte");
-
-//            ServiceUtil.submitProcScanInfo(null);
-//
-//            for(int  i=0; i<=10;i++){
-//                UserDocument ud = new UserDocument();
-////                ud.setCertName(i+"one");
-//
-////                TaskThreadPool.addTask(ud);
-//            }
+			/**
+			 * ÍøÌü¿ª»§ÔöÁ¿ÇëÇó
+			 */
+			String wt_url= wt_ip+Constant.REQ_GET_FILE_URL+"&Operate_time="+operateTime+"&dataType="+dateType;
+			log.info("·¢ËÍ[ÍøÌü¿ª»§]ÔöÁ¿Êı¾İÇëÇó£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+"");
+			String redata = HttpUtil.remoteRequest(wt_url,null);
+			log.info("ÇëÇó[ÍøÌü¿ª»§]ÔöÁ¿Êı¾İÏìÓ¦½á¹û£º"+redata);
+			//{"state": 0}
+			Map<String, Object> map = new HashMap<String, Object>();
+			map = (Map<String, Object>) JSONObject.fromObject(redata);
+			if(String.valueOf(map.get("state")).equals("1")){
+				log.info("ÇëÇó[ÍøÌü¿ª»§]ÔöÁ¿Êı¾İÇëÇó·¢ËÍ³É¹¦£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+"");
+			}else{
+				log.info("ÇëÇó[ÍøÌü¿ª»§]ÔöÁ¿Êı¾İÇëÇó·¢ËÍÊ§°Ü£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+"");
+			}
 
 
-
-            System.out.println("two--end");
+			/**
+			 * ÒµÎñ°ìÀíÔöÁ¿ÇëÇó
+			 */
+			dateType="1";
+			wt_url= wt_ip+Constant.REQ_GET_FILE_URL+"&Operate_time="+operateTime+"&dataType="+dateType;
+			log.info("·¢ËÍ[ÒµÎñ°ìÀí]ÔöÁ¿Êı¾İÇëÇó£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+"");
+			redata = HttpUtil.remoteRequest(wt_url,null);
+			log.info("ÇëÇó[ÒµÎñ°ìÀí]ÔöÁ¿Êı¾İÏìÓ¦½á¹û£º"+redata);
+			Map<String, Object> blmap = new HashMap<String, Object>();
+			blmap = (Map<String, Object>) JSONObject.fromObject(redata);
+			if(String.valueOf(blmap.get("state")).equals("1")){
+				log.info("ÇëÇó[ÒµÎñ°ìÀí]ÔöÁ¿Êı¾İÇëÇó·¢ËÍ³É¹¦£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+"");
+			}else{
+				log.info("ÇëÇó[ÒµÎñ°ìÀí]ÔöÁ¿Êı¾İÇëÇó·¢ËÍÊ§°Ü£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+"");
+			}
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+			log.info("ÇëÇóÔöÁ¿Êı¾İÇëÇó·¢ËÍÊ§°Ü£ºÇëÇóÊ±¼ä Operate_time="+operateTime+",dataType="+dateType+""+e.getMessage());
         }
     }
 
-    public void readingFile() {
-		log.info("æ‰§è¡Œè¯»å–ok.txtè°ƒåº¦ä»»åŠ¡");
+	/**
+	 * ¶¨Ê±È¥»ñ¡¾¿ª»§¡¿µÄok.txtÎÄ¼ş£¬²éÎÄ¼şÊÇ·ñÈ«²¿±»µ¼³ö
+	 */
+	public void getKHFile() {
+		try {
+			log.info("Ö´ĞĞ¶ÁÈ¡ok.txtµ÷¶ÈÈÎÎñ");
 
-		String ftpUrl = ConfigUtil.getProperty("ftp_url");
-		String operateTime = ConfigUtil.getProperty("operate_time");
-		String dateType = ConfigUtil.getProperty("date_type");
-		String dayOfMonth = ConfigUtil.getProperty("day_of_month");
-		dateType = "0".equals(dateType) ? "kh" : "ywbl";
-		//æ­¤æ¬¡æ–¹æ³•æ‰§è¡Œè¦æŸ¥æ‰¾çš„ç›®çš„æ–‡ä»¶ ok.txt
-		final String targetFilename = ConfigUtil.getProperty("ok_txt");
+			String ftpUrl = ConfigUtil.getProperty(Constant.FTP_URL);
+			final String okFileName = ConfigUtil.getProperty(Constant.OK_TXT);
 
-		//ftpè·¯å¾„ï¼Œä¾‹å¦‚20170828/12
-		StringBuilder ftpFilePath = new StringBuilder(20);
-		ftpFilePath.append(operateTime).append("/");
-		ftpFilePath.append(dayOfMonth).append("/");
+			String operateTime = ConfigUtil.getParamProperty(Constant.OPERATE_TIME);
+			String dateType = ConfigUtil.getParamProperty(Constant.DATE_TYPE);
+			String dayOfMonth = ConfigUtil.getParamProperty(Constant.DAY_OF_MONTH); //ÇëÇóÈÕÆÚ
+			dateType = "0".equals(dateType) ? "kh" : "ywbl";
+			//´Ë´Î·½·¨Ö´ĞĞÒª²éÕÒµÄÄ¿µÄÎÄ¼ş ok.txt
 
-		FTPFile[] ftpFiles = FtpUtil.listFiles(ftpUrl, ftpFilePath.toString());
+			//ftpÂ·¾¶£¬ÀıÈç20170828/12
+			StringBuilder ftpFilePath = new StringBuilder();
+			ftpFilePath.append(operateTime).append("/").append(dayOfMonth);
 
-		if (ftpFiles == null || ftpFiles.length <= 0) {
-			log.info(ftpFilePath + "ç›®å½•ä¸‹æ²¡æœ‰æ–‡ä»¶æˆ–æ–‡ä»¶å¤¹ï¼Œæ— æ³•æ‰¾åˆ°ok.txtæ–‡ä»¶");
-			return;
-		}
-		
-		//å¦‚æœå­˜åœ¨å¤§æ•°æ®é‡ï¼Œç›®å½•å±‚çº§é€’å¢ï¼Œå¾ªç¯å¤„ç†æ­¤æƒ…å†µ
-		for (FTPFile ftpFile : ftpFiles) {
+			FTPFile[] ftpFiles = FtpUtil.listFiles(ftpUrl, ftpFilePath.toString());
 
-			//okFilePathï¼šè¦ä¸‹è½½çš„ok.txtæ–‡ä»¶çš„è·¯å¾„
-			StringBuilder okFilePath = new StringBuilder(ftpFilePath);
-			okFilePath.append(ftpFile.getName()).append("/");
-			okFilePath.append(dateType).append("/");
+			if (ftpFiles == null || ftpFiles.length <= 0) {
+				log.info(ftpFilePath + "Ä¿Â¼ÏÂÃ»ÓĞÎÄ¼ş»òÎÄ¼ş¼Ğ£¬ÎŞ·¨ÕÒµ½ok.txtÎÄ¼ş");
+				return;
+			}
 
-			//savePathï¼šä¸‹è½½çš„ä¿å­˜è·¯å¾„
-			final String savePath = ConfigUtil.getProperty("root_path") + okFilePath.toString();
-			
-			okFilePath.append(targetFilename);
-			
-			try {
-				//ä¸‹è½½ok.txt
-				FtpUtil.getFile(ftpUrl, okFilePath.toString(), new FtpUtil.FtpCallback() {
-					public void onReceive(InputStream inStream) throws IOException {
-						if (inStream == null || (inStream != null && inStream.available() <= 0)) {
-							throw new IOException("FTPè·å–çš„æ–‡ä»¶æµä¸ºç©º");
-						}
-						try {
-							FileUtil.write(savePath, targetFilename, inStream);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+			/**
+			 * Èç¹û´æÔÚ´óÊı¾İÁ¿£¬Ä¿Â¼²ã¼¶µİÔö£¬Ñ­»·´¦Àí´ËÇé¿ö,¶Ô·½¿ÉÄÜÒòÊıÁ¿¹ı¶à£¬»á·ÖÅú´Îµ¼³ö£¬¹æÔò£º´Ó0ÎÄ¼ş¼Ğ¿ªÊ¼£¬Ã¿¸öÎÄ¼ş¼ĞÖĞ°üº¬5WµÄÊı¾İ
+			 * ,ÀıÈç´æÔÚ11WÊı¾İ£¬Ôò½«Éú³É0,1,2ÎÄ¼ş¼Ğ£¬¹ÊĞèÒªÑ­»·±éÀúÎÄ¼ş¼Ğ²é¿´ÊÇ·ñ¶¼ÓĞok.txt
+			 */
+			for (FTPFile ftpFile : ftpFiles) {
+				//²é¿´ÊÇ·ñÓĞok.txt
+				String relaPath = new String(ftpFilePath.toString().getBytes("gbk"), "iso-8859-1")+"/"+ftpFile.getName();
+
+				FtpUtil.getFile(ftpUrl, relaPath,okFileName,new FtpUtil.FtpCallback() {
+                @Override
+                public void postSend() {
+//                    logger.debug("[FTP]ÕıÔÚ·¢ÆğÏÂÔØÎÄ¼şÇëÇó");
+                }
+
+                @Override
+                public void onReceive(InputStream inStream) throws IOException {
+                    if(inStream ==null || (inStream!=null && inStream.available()<=0)){
+                        throw new IOException("FTP»ñÈ¡µÄÎÄ¼şÁ÷Îª¿Õ");
+                    }
+                    if(inStream.available()>=1){
+                    	//ÓĞÎÄ¼ş£¬Ôò¿ÉÒÔ½øĞĞÎÄ¼ş¼ĞÏÂÔØ
+
 					}
 
+                }
+
+                @Override
+                public void onException(Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
+
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
+
+	/**
+	 * ¶¨Ê±È¥»ñ¡¾ÒµÎñ°ìÀí¡¿µÄok.txtÎÄ¼ş£¬²éÎÄ¼şÊÇ·ñÈ«²¿±»µ¼³ö
+	 */
+	public void getYWBLFile() {
+		try {
+			log.info("Ö´ĞĞ¶ÁÈ¡ok.txtµ÷¶ÈÈÎÎñ");
+			final String ftpUrl = ConfigUtil.getProperty(Constant.FTP_URL);
+			final String okFileName = ConfigUtil.getProperty(Constant.OK_TXT);
+			final String local_tmp_path = ConfigUtil.getProperty(Constant.LOCAL_TMP_PATH);
+
+			String operateTime = ConfigUtil.getParamProperty(Constant.OPERATE_TIME);
+			String dayOfMonth = ConfigUtil.getParamProperty(Constant.DAY_OF_MONTH); //ÇëÇóÈÕÆÚ
+			//´Ë´Î·½·¨Ö´ĞĞÒª²éÕÒµÄÄ¿µÄÎÄ¼ş ok.txt
+
+			//ftpÂ·¾¶£¬ÀıÈç20170828/12
+			StringBuilder ftpFilePath = new StringBuilder();
+			ftpFilePath.append(operateTime).append("/").append(dayOfMonth);
+
+			FTPFile[] ftpFiles = FtpUtil.listFiles(ftpUrl, ftpFilePath.toString());
+
+			if (ftpFiles == null || ftpFiles.length <= 0) {//20170628\24\
+				log.info(ftpFilePath + "Ä¿Â¼ÏÂÃ»ÓĞÎÄ¼ş»òÎÄ¼ş¼Ğ£¬ÎŞ·¨ÕÒµ½ok.txtÎÄ¼ş");
+				return;
+			}
+
+			/**
+			 * Èç¹û´æÔÚ´óÊı¾İÁ¿£¬Ä¿Â¼²ã¼¶µİÔö£¬Ñ­»·´¦Àí´ËÇé¿ö,¶Ô·½¿ÉÄÜÒòÊıÁ¿¹ı¶à£¬»á·ÖÅú´Îµ¼³ö£¬¹æÔò£º´Ó0ÎÄ¼ş¼Ğ¿ªÊ¼£¬Ã¿¸öÎÄ¼ş¼ĞÖĞ°üº¬5WµÄÊı¾İ
+			 * ,ÀıÈç´æÔÚ11WÊı¾İ£¬Ôò½«Éú³É0,1,2ÎÄ¼ş¼Ğ£¬¹ÊĞèÒªÑ­»·±éÀúÎÄ¼ş¼Ğ²é¿´ÊÇ·ñ¶¼ÓĞok.txt
+			 * 20170628\24\0\ywbl\
+			 */
+			for (FTPFile ftpFile : ftpFiles) {
+				//²é¿´ÊÇ·ñÓĞok.txt
+				String relaPath = new String(ftpFilePath.toString().getBytes("gbk"), "iso-8859-1") + "/" + ftpFile.getName() + "/" + ftpFile.getName() + "/ywbl";
+				FtpUtil.getFile(ftpUrl, relaPath, okFileName, new FtpUtil.FtpCallback() {
+					@Override
+					public void postSend() {
+					}
+
+					@Override
+					public void onReceive(InputStream inStream,String rPath) throws IOException {
+						if (inStream == null || (inStream != null && inStream.available() <= 0)) {
+							throw new IOException("FTP»ñÈ¡µÄÎÄ¼şÁ÷Îª¿Õ");
+						}
+						if (inStream.available() >= 1) {
+							//ÓĞÎÄ¼ş£¬Ôò¿ÉÒÔ½øĞĞÎÄ¼ş¼ĞÏÂÔØ
+							try {
+								TaskThreadPool.addDownloadTask(ftpUrl, rPath, local_tmp_path);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+					}
+
+					@Override
 					public void onException(Exception e) {
 						e.printStackTrace();
 					}
 				});
-			} catch (Exception e) {
-				e.printStackTrace();
-				log.error("æ–‡ä»¶ä¸‹è½½å¤±è´¥ï¼š" + okFilePath.toString());
+
 			}
-
-			File targetFile = new File(savePath, targetFilename);
-			if (!targetFile.exists()) {
-				log.info("æ­¤æ–‡ä»¶ä¸å­˜åœ¨ï¼š" + targetFile.getPath());
-				return;
-			}
-
-			long fileSize = targetFile.length();
-			log.info("æ­¤æ–‡ä»¶å¤§å°ï¼š" + fileSize + "ï¼Œæ–‡ä»¶è·¯å¾„ï¼š" + targetFile.getPath());
-
-			if (fileSize < 20) {
-				log.info("æ­¤æ–‡ä»¶å­˜åœ¨ç¼ºæŸï¼š" + targetFile.getPath());
-				return;
-			}
-
-			log.info(targetFile.getPath() + "æ–‡ä»¶å­˜åœ¨ï¼Œå¹¶ä¸”æ–‡ä»¶å¤§å°ç¬¦åˆè¦æ±‚ã€‚");
-			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
-    
-    protected void execute()  {
-        long ms = System.currentTimeMillis();
-        System.out.println("\t\t" + new Date(ms));
-    }	
-	
 
-
+	public void test(){
+//		String ftpUrl = "ftp://administrator:gtja@2016@10.189.145.56:2122/";
+//		String relaPath = "20150416";
+//		String localpath="D://test//test";
+//
+//		try {
+//			TaskThreadPool.addDownloadTask(ftpUrl,relaPath,localpath);
+//			System.out.println("addDownloadTask....");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		getYWBLFile();
+	}
 }

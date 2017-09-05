@@ -17,8 +17,8 @@ public class HttpUtil {
     /**
      * HTTP请求远程数据
      * @param requestUrl 请求地址
-     * @param count 当前请求的次数
-     * @return 令牌
+     * @param param 请求参数
+     * @return 请求结果
      */
     public static String remoteRequest(String requestUrl,String param) throws Exception {
         try {
