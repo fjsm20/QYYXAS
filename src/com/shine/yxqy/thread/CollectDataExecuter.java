@@ -92,6 +92,6 @@ public class CollectDataExecuter implements Runnable {
         } catch (Exception e) {
 
         }
-        System.out.println("业务线程执行...Name=" + Thread.currentThread().getName() + " ," + userDocument.getCertName());
+        System.out.println("业务线程执行...Name=" + Thread.currentThread().getName() + " ," + userDocument.getCustName());
     }
 }

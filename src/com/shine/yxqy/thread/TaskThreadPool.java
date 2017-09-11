@@ -1,6 +1,7 @@
 package com.shine.yxqy.thread;
 
 import com.shine.yxqy.po.UserDocument;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -75,6 +76,16 @@ public class TaskThreadPool {
             threadPoolExecutor.execute(new CollectDataExecuter(userDocument));
         }else{
             log.info("处理对象为空，不进行处理");
+        }
+    }
+
+    /**
+     * 下载文件夹任务
+     */
+    public static void addDownloadTask(String ftpUrl,String relaPath,String localPath)throws Exception {
+        if(StringUtils.isNotEmpty(relaPath) && StringUtils.isNotEmpty(ftpUrl)){
+            log.info("进行影像文件夹下载:path="+relaPath);
+            threadPoolExecutor.execute(new FileDownloadExecuter(ftpUrl,relaPath,localPath));
         }
     }
 }

@@ -10,6 +10,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
  * 国泰君安XML文件解析
  *
  */
+@Component
 public class GJXMLServiceImpl extends XMLService {
 	private static Logger log = Logger.getLogger(GJXMLServiceImpl.class);
 
@@ -84,7 +86,7 @@ public class GJXMLServiceImpl extends XMLService {
 			log.info("XML解析失败[filename=" + filename + "] ," + e.getMessage());
 		} finally {
 			long endTime = System.currentTimeMillis();
-			log.info("XML解析结束，总共耗时：" + (endTime - beginTime));
+			log.info("XML解析结束，总共耗时：" + (endTime - beginTime)+" 毫秒");
 		}
 	}
 
