@@ -1,67 +1,68 @@
 package com.shine.yxqy.quarz;
 
+import com.shine.yxqy.po.UserDocument;
 import com.shine.yxqy.thread.TaskThreadPool;
 import com.shine.yxqy.util.ConfigUtil;
 import com.shine.yxqy.util.Constant;
 import com.shine.yxqy.util.FtpUtil;
 import com.shine.yxqy.util.HttpUtil;
+import com.shine.yxqy.xml.XMLService;
+import com.shine.yxqy.xml.impl.GJXMLServiceImpl;
 import net.sf.json.JSONObject;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataCollectTask {
     public static Logger log = Logger.getLogger(DataCollectTask.class);
 
 
     public void requestLifeCtrl() {
-		String wt_ip=ConfigUtil.getProperty(Constant.WT_IP);
-		String operateTime = ConfigUtil.getParamProperty(Constant.OPERATE_TIME);
-		String dateType = "0"; //0:开户  1：业务办理
-    	try{
-
-			/**
-			 * 网厅开户增量请求
-			 */
-			String wt_url= wt_ip+Constant.REQ_GET_FILE_URL+"&Operate_time="+operateTime+"&dataType="+dateType;
-			log.info("发送[网厅开户]增量数据请求：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
-			String redata = HttpUtil.remoteRequest(wt_url,null);
-			log.info("请求[网厅开户]增量数据响应结果："+redata);
-			//{"state": 0}
-			Map<String, Object> map = new HashMap<String, Object>();
-			map = (Map<String, Object>) JSONObject.fromObject(redata);
-			if(String.valueOf(map.get("state")).equals("1")){
-				log.info("请求[网厅开户]增量数据请求发送成功：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
-			}else{
-				log.info("请求[网厅开户]增量数据请求发送失败：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
-			}
-
-
-			/**
-			 * 业务办理增量请求
-			 */
-			dateType="1";
-			wt_url= wt_ip+Constant.REQ_GET_FILE_URL+"&Operate_time="+operateTime+"&dataType="+dateType;
-			log.info("发送[业务办理]增量数据请求：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
-			redata = HttpUtil.remoteRequest(wt_url,null);
-			log.info("请求[业务办理]增量数据响应结果："+redata);
-			Map<String, Object> blmap = new HashMap<String, Object>();
-			blmap = (Map<String, Object>) JSONObject.fromObject(redata);
-			if(String.valueOf(blmap.get("state")).equals("1")){
-				log.info("请求[业务办理]增量数据请求发送成功：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
-			}else{
-				log.info("请求[业务办理]增量数据请求发送失败：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
-			}
-
-
-        } catch (Exception e) {
-			log.info("请求增量数据请求发送失败：请求时间 Operate_time="+operateTime+",dataType="+dateType+""+e.getMessage());
-        }
+//		String wt_ip=ConfigUtil.getProperty(Constant.WT_IP);
+//		String operateTime = ConfigUtil.getParamProperty(Constant.OPERATE_TIME);
+//		String dateType = "0"; //0:开户  1：业务办理
+//    	try{
+//
+//			/**
+//			 * 网厅开户增量请求
+//			 */
+//			String wt_url= wt_ip+Constant.REQ_GET_FILE_URL+"&Operate_time="+operateTime+"&dataType="+dateType;
+//			log.info("发送[网厅开户]增量数据请求：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
+//			String redata = HttpUtil.remoteRequest(wt_url,null);
+//			log.info("请求[网厅开户]增量数据响应结果："+redata);
+//			//{"state": 0}
+//			Map<String, Object> map = new HashMap<String, Object>();
+//			map = (Map<String, Object>) JSONObject.fromObject(redata);
+//			if(String.valueOf(map.get("state")).equals("1")){
+//				log.info("请求[网厅开户]增量数据请求发送成功：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
+//			}else{
+//				log.info("请求[网厅开户]增量数据请求发送失败：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
+//			}
+//
+//
+//			/**
+//			 * 业务办理增量请求
+//			 */
+//			dateType="1";
+//			wt_url= wt_ip+Constant.REQ_GET_FILE_URL+"&Operate_time="+operateTime+"&dataType="+dateType;
+//			log.info("发送[业务办理]增量数据请求：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
+//			redata = HttpUtil.remoteRequest(wt_url,null);
+//			log.info("请求[业务办理]增量数据响应结果："+redata);
+//			Map<String, Object> blmap = new HashMap<String, Object>();
+//			blmap = (Map<String, Object>) JSONObject.fromObject(redata);
+//			if(String.valueOf(blmap.get("state")).equals("1")){
+//				log.info("请求[业务办理]增量数据请求发送成功：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
+//			}else{
+//				log.info("请求[业务办理]增量数据请求发送失败：请求时间 Operate_time="+operateTime+",dataType="+dateType+"");
+//			}
+//
+//
+//        } catch (Exception e) {
+//			log.info("请求增量数据请求发送失败：请求时间 Operate_time="+operateTime+",dataType="+dateType+""+e.getMessage());
+//        }
     }
 
 	/**
@@ -149,6 +150,7 @@ public class DataCollectTask {
 			StringBuilder ftpFilePath = new StringBuilder();
 			ftpFilePath.append(operateTime).append("/").append(dayOfMonth);
 
+
 			FTPFile[] ftpFiles = FtpUtil.listFiles(ftpUrl, ftpFilePath.toString());
 
 			if (ftpFiles == null || ftpFiles.length <= 0) {//20170628\24\
@@ -163,7 +165,7 @@ public class DataCollectTask {
 			 */
 			for (FTPFile ftpFile : ftpFiles) {
 				//查看是否有ok.txt
-				String relaPath = new String(ftpFilePath.toString().getBytes("gbk"), "iso-8859-1") + "/" + ftpFile.getName() + "/" + ftpFile.getName() + "/ywbl";
+				String relaPath = new String(ftpFilePath.toString().getBytes("gbk"), "iso-8859-1") + "/" + ftpFile.getName() + "/ywbl";
 				FtpUtil.getFile(ftpUrl, relaPath, okFileName, new FtpUtil.FtpCallback() {
 					@Override
 					public void postSend() {
@@ -194,13 +196,15 @@ public class DataCollectTask {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+//			FtpUtil.ftpLogout();
 		}
 	}
 
 	public void test(){
-//		String ftpUrl = "ftp://administrator:gtja@2016@10.189.145.56:2122/";
-//		String relaPath = "20150416";
-//		String localpath="D://test//test";
+		String ftpUrl = "ftp://administrator:gtja@2016@10.189.145.56:2122/";
+		String relaPath = "20150416";
+		String localpath="D://test//test";
 //
 //		try {
 //			TaskThreadPool.addDownloadTask(ftpUrl,relaPath,localpath);
@@ -209,5 +213,10 @@ public class DataCollectTask {
 //			e.printStackTrace();
 //		}
 		getYWBLFile();
+//		List<UserDocument> listUD = new ArrayList<UserDocument>();
+//		XMLService xmlService = new GJXMLServiceImpl();
+//		String custxmlPath = "F:\\shine\\项目资料\\EEAMS\\国君证券\\迁移资料\\网厅\\20170625\\06/0/ywbl/"+Constant.CUST_XML;
+//		xmlService.iterateAnalysisXML(custxmlPath,listUD);
+//		System.out.println("xml解析结束"+listUD.size());
 	}
 }

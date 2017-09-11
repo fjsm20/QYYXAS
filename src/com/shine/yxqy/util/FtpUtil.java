@@ -44,7 +44,6 @@ public class FtpUtil {
 
             ftpHelper.beforeConnect();
             ftpLogin(ip, port, username, password);
-            System.out.println("FTP登入成功");
             ftpHelper.onConnect();
 
             List<FFile> fFileList = new ArrayList<FFile>();
@@ -60,6 +59,41 @@ public class FtpUtil {
                     ftpHelper.onReceive(fFileList);
                 }
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            System.out.println("登出");
+            ftpLogout();
+        }
+        return doFlag;
+
+    }
+
+    /**
+     * 获取整个文件夹及其文件（用于下载FTP上的目录结构到本地中）
+     * @param url FTP的URL：ftp://ftpuser:123321@127.0.0.1:21/33
+     * @param remotePath FTP待下载的文件夹（abc 或者 /1/2/abc）
+     * @param localPath  存放本地路径（C://ABC//102）
+     * @param listener 回调函数
+     */
+    public static boolean getDirFiles(FTPClient ftpClient,String remotePath,String localPath,FtpUtil.FtpListener listener) throws IOException {
+        boolean doFlag = false;
+        FtpHelper ftpHelper = new FtpHelper(listener);
+        try {
+            List<FFile> fFileList = new ArrayList<FFile>();
+
+            if (ftpClient != null) {
+                if(remotePath.contains(".")) {
+                    System.out.println("不是有效文件路径");
+                }else {
+                    ftpClient.changeWorkingDirectory(new String(remotePath.getBytes("gbk"), "iso-8859-1"));
+                    localPath = localPath+"/"+remotePath;
+                    iterateFTPDir(localPath,  fFileList);
+                    ftpHelper.onReceive(fFileList);
+                }
+            }
+            doFlag= true;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -154,9 +188,10 @@ public class FtpUtil {
                     ftpClient.changeWorkingDirectory(relaPath);
                 }
                 is = ftpClient.retrieveFileStream(ftpFile);
-                Thread.sleep(100);
+                Thread.sleep(10);
                 if (is == null) {
-                    throw new Exception("流为空：ftpFile=" + ftpFile);
+                    log.info("[ok.txt文件检测,relaPath="+relaPath+"/"+ftpFile+" ,不存在]");
+                    throw new Exception("[ok.txt文件检测,relaPath="+relaPath+"/"+ftpFile+" ,不存在]");
                 }
                 ftpHelper.onReceive(is,relaPath);
             }
@@ -167,7 +202,7 @@ public class FtpUtil {
             log.error("FTP获取文件失败," + e.getMessage());
             throw new Exception(e);
         } finally {
-            ftpLogout();
+//            ftpLogout();
         }
     }
 
@@ -196,6 +231,7 @@ public class FtpUtil {
                 throw new Exception("FPT尝试登录失败");
             }
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            System.out.println("FTP登入成功");
 
         } catch (Exception e) {
             log.error("FTP连接登录异常：" + e.getMessage());
@@ -233,9 +269,7 @@ public class FtpUtil {
 			String ip = String.valueOf(param.get("ip"));
 			int port = Integer.parseInt(String.valueOf(param.get("port")));
 
-			ftpHelper.beforeConnect();
 			ftpLogin(ip, port, username, password);
-			ftpHelper.onConnect();
 
 			if (ftpClient != null) {
 				return ftpClient.listFiles(path);

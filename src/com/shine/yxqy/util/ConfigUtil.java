@@ -21,11 +21,11 @@ public class ConfigUtil {
     }
 
     public static String getProperty(String key) {
-        return properties.getProperty(key);
+        return String.valueOf(properties.getProperty(key));
 	}
 
     public static String getParamProperty(String key) {
-        return paramProperties.getProperty(key);
+        return String.valueOf(paramProperties.getProperty(key));
     }
 
 

@@ -1,8 +1,10 @@
 package com.shine.yxqy.xml.impl;
 
+import com.shine.yxqy.po.FileType;
 import com.shine.yxqy.po.UserDocument;
 import com.shine.yxqy.po.YXFile;
 import com.shine.yxqy.util.ConfigUtil;
+import com.shine.yxqy.util.Constant;
 import com.shine.yxqy.xml.XMLService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -12,179 +14,177 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.stereotype.Component;
 
+import javax.sound.midi.Soundbank;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * å›½æ³°å›å®‰XMLæ–‡ä»¶è§£æ
+ * ¹úÌ©¾ı°²XMLÎÄ¼ş½âÎö
  *
  */
 @Component
 public class GJXMLServiceImpl extends XMLService {
 	private static Logger log = Logger.getLogger(GJXMLServiceImpl.class);
 
-	private String partOfRelaPath;
-	private static String ROOT_PATH = ConfigUtil.getProperty("root_path");
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void iterateAnalysisXML(String filename, List<UserDocument> listUD) {
-		log.info("è¿›è¡ŒXMLè§£æ[filename=" + filename + "]");
+		log.info("½øĞĞXML½âÎö[filename=" + filename + "]");
 		long beginTime = System.currentTimeMillis();
-
-		//æˆªå–ä¸€éƒ¨åˆ†çš„ç›¸å¯¹è·¯å¾„
-		this.setPartOfRelaPath(filename);
+		String relaPath = filename.substring(0, filename.lastIndexOf("/"));
+		String relaFilePath = "";
+		System.out.println("Ïà¶ÔÂ·¾¶ÊÇ£º" + relaPath);
+		String busiCode = "";
+		String oprDate = ConfigUtil.getParamProperty(Constant.OPERATE_TIME);
+		if(relaPath.toLowerCase().contains("/ywbl")){
+			busiCode= ConfigUtil.getProperty(Constant.YWBL_BUSI_CODE);
+		}else{
+			busiCode= ConfigUtil.getProperty(Constant.KH_BUSI_CODE);
+		}
 
 		SAXReader saxReader = new SAXReader();
 		try {
 			Document document = saxReader.read(new File(filename));
 			Element root = document.getRootElement();
-			for (Iterator iter = root.elementIterator(); iter.hasNext();) {
+			for (Iterator iter = root.elementIterator(); iter.hasNext(); ) {
 				Element element = (Element) iter.next();
 				UserDocument ud = new UserDocument();
-				List<YXFile> xyFileList = new ArrayList<YXFile>();
-				ud.setFileList(xyFileList);
+				ud.setOprDate(oprDate);
 
-				// éå†Khxxç»“ç‚¹çš„æ‰€æœ‰å­èŠ‚ç‚¹ï¼ˆIDï¼ŒUSER_NAME...ï¼‰ï¼Œå¹¶è¿›è¡Œå¤„ç†
-				for (Iterator iterInner = element.elementIterator(); iterInner.hasNext();) {
+				// ±éÀúKhxx½áµãµÄËùÓĞ×Ó½Úµã£¨ID£¬USER_NAME...£©£¬²¢½øĞĞ´¦Àí
+				for (Iterator iterInner = element.elementIterator(); iterInner.hasNext(); ) {
 					Element elementInner = (Element) iterInner.next();
-					if (elementInner.getName().equals("USER_NAME")) {
+					if ("ID".equals(elementInner.getName())) {
+						ud.setId(elementInner.getText());
+						continue;
+					}
+					if ("USER_NAME".equals(elementInner.getName())) {
 						ud.setCustName(elementInner.getText());
+						ud.setCertType("0");//Ä¬ÈÏÉèÖÃ¿Í»§´úÂëÎªÉí·İÖ¤
+						continue;
 					}
-					if (elementInner.getName().equals("CARD_NUM")) {
+					if ("CARD_NUM".equals(elementInner.getName())) {
 						ud.setCertCode(elementInner.getText());
+						continue;
 					}
-
 					if ("CUST_ID".equals(elementInner.getName())) {
 						ud.setCustId(elementInner.getText());
+						relaFilePath = relaPath + "/" + element.getText();//ÉèÖÃÎÄ¼şµÄÏà¶ÔÂ·¾¶
+						continue;
 					}
-
 					if ("CZY".equals(elementInner.getName())) {
 						ud.setUserCode(elementInner.getText());
+						continue;
 					}
-					// å„ç§ç±»å‹çš„æ–‡ä»¶ID
-					if (!"CUST_ID".equals(elementInner.getName()) && elementInner.getName().contains("_ID")) {
-						this.tagVal2Id(ud, elementInner);
+					if ("AFTER_ID".equals(elementInner.getName())) {
+						ud.setAfterId(elementInner.getText());
+						continue;
+					}
+					if ("BEFORE_ID".equals(elementInner.getName())) {
+						ud.setBeforeId(elementInner.getText());
+						continue;
+					}
+					if ("POLICE_ID".equals(elementInner.getName())) {
+						ud.setPoliceId(elementInner.getText());
+						continue;
+					}
+					if ("GROUP_ID".equals(elementInner.getName())) {
+						ud.setGroupId(elementInner.getText());
+						continue;
+					}
+					if ("AVATAR_ID".equals(elementInner.getName())) {
+						ud.setAvatarId(elementInner.getText());
+						continue;
+					}
+					if ("SIGN_FILE_ID".equals(elementInner.getName())) {
+						ud.setSignFileId(elementInner.getText());
+						continue;
 					}
 
-					if (elementInner.getName().contains("YXZL")) {
-						this.toFileDetail(ud, elementInner);
+					if (elementInner.getName().contains("YXZL") || elementInner.getName().contains("YXZL_SP") ||
+							elementInner.getName().contains("XY")) {
+						doFileDetail(elementInner, ud, relaFilePath);
 					}
-
 				}
-
-				//å‰”é™¤YXFileå¯¹è±¡å­—æ®µæ•°æ®ä¸å®Œæ•´çš„å¯¹è±¡
-				this.dropIncompleteObj(ud);
-				//è®¾ç½®ç”¨æˆ·æ–‡ä»¶å¯¹è±¡çš„busi_code
-				ud.setBusiCode(ConfigUtil.getProperty("busi_code"));
+				//ÉèÖÃÓÃ»§ÎÄ¼ş¶ÔÏóµÄbusi_code
+				ud.setBusiCode(busiCode);
 				listUD.add(ud);
+
 			}
 
+			System.out.println("½áÊø="+listUD.size());
+
 		} catch (DocumentException e) {
-			log.info("XMLè§£æå¤±è´¥[filename=" + filename + "] ," + e.getMessage());
+			log.info("XML½âÎöÊ§°Ü[filename=" + filename + "] ," + e.getMessage());
 		} finally {
 			long endTime = System.currentTimeMillis();
-			log.info("XMLè§£æç»“æŸï¼Œæ€»å…±è€—æ—¶ï¼š" + (endTime - beginTime)+" æ¯«ç§’");
+			log.info("XML½âÎö½áÊø£¬½âÎöÓĞĞ§ÎÄ¼şÊıÁ¿£º"+listUD.size()+" ,×Ü¹²ºÄÊ±£º" + (endTime - beginTime) + " ºÁÃë");
 		}
 	}
 
-	/**
-	 * è¯»å–æ–‡ä»¶IDæ ‡ç­¾ï¼Œå¹¶å°†æ–‡ä»¶ä¿¡æ¯æ”¾å…¥å¯¹åº”UserDocumentå¯¹è±¡çš„å­—æ®µfileListä¸­
-	 * @param ud UserDocumentï¼Œæ¯ä¸€ä¸ªkhxxæ ‡ç­¾çš„å¯¹è±¡ç±»
-	 * @param ele dom4jæ ‡ç­¾å…ƒç´ ï¼Œkhxxæ ‡ç­¾ä¸‹çš„å­æ ‡ç­¾
-	 */
-	private void tagVal2Id(UserDocument ud, Element ele) {
-		if (StringUtils.isEmpty(ele.getText())) {
-			return;
-		}
-
-		YXFile xf = new YXFile();
-
-		// è®¾ç½®æ–‡ä»¶IDå’Œæ–‡ä»¶ç±»å‹
-		xf.setId(ele.getText());
-		xf.setFileType(ele.getName().substring(0, ele.getName().lastIndexOf("_ID")));
-		ud.getFileList().add(xf);
-	}
 
 	/**
-	 * æ ¹æ®YXZLæˆ–YXZL_SPæ ‡ç­¾ï¼Œè®¾ç½®è¯¦ç»†çš„YXFileå¯¹è±¡ä¿¡æ¯
-	 * @param userDoc ç”¨æˆ·å¯¹è±¡
-	 * @param element xmlæ–‡ä»¶ä¸­YXZLæˆ–YXZL_SPæ ‡ç­¾å…ƒç´ 
+	 * ¸ù¾İYXZL¡¢YXZL_SP¡¢XY±êÇ©£¬ÉèÖÃÏêÏ¸µÄYXFile¶ÔÏóĞÅÏ¢
+	 * @param element ÔªËØ
+	 * @param userDoc ÓÃ»§¶ÔÏó
+	 * @param relaPath Ïà¶ÔÂ·¾¶
 	 */
-	private void toFileDetail(UserDocument userDoc, Element element) {
-		//è¿­ä»£å™¨è·å–YXZLæˆ–YXZL_SPæ ‡ç­¾çš„å­æ ‡ç­¾å…ƒç´ 
-		Iterator<?> eleIt = element.elementIterator();
-		List<YXFile> fileList = userDoc.getFileList();
+	private void doFileDetail(Element element,UserDocument userDoc,String relaPath) {
+		List<YXFile> existsFileList = userDoc.getFileList();
+		List<YXFile> notExistsFileList = userDoc.getLostFileList();
+		List<Element> elist = element.elements();
+		int size = elist.size();
+		//»ñÈ¡YXZL»òYXZL_SP±êÇ©µÄ×Ó±êÇ©ÔªËØ
 		YXFile yf = new YXFile();
-		//è®¾ç½®æ ¹è·¯å¾„
-		yf.setRootPath(ROOT_PATH);
-
-		StringBuilder relaPathSb = new StringBuilder(30);
-		while (eleIt.hasNext()) {
-			Element ele = (Element) eleIt.next();
-
-			//è·å–IDå€¼
+		for(int i=0;i<size;i++){
+			Element ele = (Element) elist.get(i);
+			//»ñÈ¡IDÖµ
 			if ("ID".equals(ele.getName())) {
 				yf.setId(ele.getText());
 			}
-			//è·å–æ–‡ä»¶åç§°
+			//»ñÈ¡ÎÄ¼şÃû³Æ
 			if ("FILE_NAME".equals(ele.getName())) {
 				yf.setFileName(ele.getText());
-				//è®¾ç½®ç›¸å¯¹è·¯å¾„
-				relaPathSb.append(this.partOfRelaPath);
-				relaPathSb.append(userDoc.getCustId()).append(File.separator).append(ele.getText());
-				yf.setRelaPath(relaPathSb.toString());
+				yf.setAbsPath((relaPath+"/"+userDoc.getCustId()+"/"+ele.getText()).trim());
+			}
+
+			//ÒµÎñID
+			if ("MODULE_ID".equals(ele.getName())) {
+				yf.setModuleId(ele.getText());
+			}
+
+			if ("ADD_DATE".equals(ele.getName())) {
+				yf.setAdddate(ele.getText());
+			}
+			if ("MODULE_NAME".equals(ele.getName())) {
+				yf.setModuleName(ele.getText());
+				System.out.println(FileType.getFileType(ele.getTextTrim()));
+				yf.setSourceNo(FileType.getFileType(ele.getTextTrim()));
+			}
+
+			if ("File".equals(ele.getName())) {
+				yf.setFileName(ele.getText());
+				yf.setAbsPath((relaPath+"/"+userDoc.getCustId()+"/"+ele.getText().trim()));
+				if(relaPath.toLowerCase().contains("/ywbl/")){
+					yf.setSourceNo(ConfigUtil.getParamProperty(Constant.BLXY_ID));
+				}else{
+					yf.setSourceNo(ConfigUtil.getParamProperty(Constant.KHXY_ID));
+				}
 			}
 		}
 
-		File f = new File(yf.getRootPath() + yf.getRelaPath());
-		yf.setFileSize(String.valueOf(f.length()));
-		/*é‡å†™è¿‡YXFileç±»çš„equalsæ–¹æ³•ï¼Œcontains()æ–¹æ³•ä»¥FileIdä¸ºåˆ¤æ–­ä¾æ®ï¼Œ
-		 *å¦‚æœfileListä¸­å·²ç»å­˜åœ¨äºyfå¯¹è±¡ç›¸åŒçš„fileIdçš„å¯¹è±¡ï¼Œåˆ™è¿”å›contains()æ–¹æ³•è¿”å›true
-		 */
-		if (fileList.contains(yf) && StringUtils.isNotEmpty(yf.getFileName())) {
-			//è®¾ç½®fileName
-			yf.setFileType(fileList.get(fileList.indexOf(yf)).getFileType());
-			fileList.set(fileList.indexOf(yf), yf);
 
-		} else if ("YXZL_SP".equals(element.getName())) {
-			//YXZL_SPæ ‡ç­¾ä¸‹ä¿¡æ¯æ•°æ®ç›´æ¥æ·»åŠ åˆ°fileListä¸­
-			yf.setFileType("VIDEO");
-			fileList.add(yf);
-		}
-	}
-
-	public void setPartOfRelaPath(String filename) {
-		String tmp = filename;
-		int beginIndex = 0;
-		if (tmp.indexOf(ROOT_PATH) > -1) {
-			beginIndex = ROOT_PATH.length();
-		}
-		int endIndex = tmp.lastIndexOf("cust.xml");
-
-		tmp = tmp.substring(beginIndex, endIndex);
-		if (StringUtils.isNotEmpty(tmp)) {
-			this.partOfRelaPath = tmp;
+		if (StringUtils.isNotEmpty(yf.getAbsPath()) && new File(yf.getAbsPath()).exists()
+				&& (yf.getSourceNo() != null && !yf.getSourceNo().equals("null"))) {
+			System.out.println("**=" + yf.getSourceNo());
+			userDoc.getFileList().add(yf);
 		} else {
-			this.partOfRelaPath = "";
+			userDoc.getLostFileList().add(yf);
 		}
 	}
 
-	/**
-	 * å»æ‰æ•°æ®ä¸å®Œæ•´çš„YXFileå¯¹è±¡ï¼Œåªæœ‰IDå’ŒFileTypeæ²¡æœ‰å…¶ä»–çš„ä¿¡æ¯çš„YXFileå¯¹è±¡éœ€è¦è¢«å‰”é™¤
-	 * @param userDoc ç”¨æˆ·æ–‡ä»¶å¯¹è±¡
-	 */
-	private void dropIncompleteObj(UserDocument userDoc) {
-		List<YXFile> fileList = userDoc.getFileList();
-
-		for (int i = fileList.size() - 1; i >= 0; i--) {
-			YXFile yf = fileList.get(i);
-			if (StringUtils.isEmpty(yf.getFileName())) {
-				fileList.remove(i);
-			}
-		}
-	}
 
 }

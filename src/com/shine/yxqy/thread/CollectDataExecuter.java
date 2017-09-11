@@ -39,16 +39,16 @@ public class CollectDataExecuter implements Runnable {
             if (fileList != null && fileList.size() >= 0) {
                 for (YXFile yxFile : fileList) {
 
-                    String filePath = yxFile.getRootPath() + File.separator + yxFile.getRelaPath() + File.separator + yxFile.getFileName();
+                    String filePath = yxFile.getAbsPath();
                     File file = new File(filePath);
                     String data = ServiceUtil.doUploadFile(yxFile.getFileName(), userDocument.getCertCode(), file);
                     JSONObject jsonMap = JSONObject.fromObject(data);
                     if (String.valueOf(jsonMap.get("retcode")).equals("0")) {
                         String fileId = String.valueOf(jsonMap.get("file_id"));
                         if (sourceNos.length() >= 1) {
-                            sourceNos.append("|").append(yxFile.getFileType()).append(",").append(fileId);
+                            sourceNos.append("|").append(yxFile.getSourceNo()).append(",").append(fileId);
                         } else {
-                            sourceNos.append(yxFile.getFileType()).append(fileId);
+                            sourceNos.append(yxFile.getSourceNo()).append(",").append(fileId);
                         }
                     } else {
                         log.info("上传文件失败..");
@@ -56,12 +56,13 @@ public class CollectDataExecuter implements Runnable {
 
                 }
 
+                userDocument.setDepCode("0004");
                 //提交信息
                 Map<String, String> jsonData = new HashMap<String, String>();
                 jsonData.put("method_id", "020123");
-                jsonData.put("src_order_no", "XY0012229");
+                jsonData.put("src_order_no", "WT"+userDocument.getId());
                 jsonData.put("busi_code", userDocument.getBusiCode());
-                jsonData.put("cust_prop", userDocument.getCustProp());
+                jsonData.put("cust_prop", "0");
                 jsonData.put("acct_code", userDocument.getAcctCode());
                 jsonData.put("cert_type", userDocument.getCertType());
                 jsonData.put("cert_code", userDocument.getCertCode());
@@ -86,11 +87,44 @@ public class CollectDataExecuter implements Runnable {
                 }
 
 
+                //归档信息
+                Map<String, String> jsonDataArch = new HashMap<String, String>();
+                jsonDataArch.put("method_id", "020524");
+                jsonDataArch.put("src_order_no", "WT"+userDocument.getId());
+                jsonDataArch.put("busi_code", "{'2001':[]}");
+                jsonDataArch.put("cust_prop", "0");
+                jsonDataArch.put("acct_code", userDocument.getAcctCode());
+                jsonDataArch.put("cert_type", userDocument.getCertType());
+                jsonDataArch.put("cert_code", userDocument.getCertCode());
+                jsonDataArch.put("cust_name", userDocument.getCustName());
+                jsonDataArch.put("opr_date",  userDocument.getOprDate());
+                jsonDataArch.put("dep_code",  userDocument.getDepCode());
+                jsonDataArch.put("khfs","2");
+                jsonDataArch.put("op_user_code", (userDocument.getUserCode().length()>=1)?userDocument.getUserCode(): appId);
+                jsonDataArch.put("app_id", appId);
+                jsonDataArch.put("stage", "9");
+                jsonDataArch.put("sync", "0");
+                jsonDataArch.put("expire_time", "10");
+                jsonDataArch.put("action_type", "data_inte");
+
+
+
+                System.out.println("归档信息："+jsonDataArch.toString());
+                rsData = ServiceUtil.archive020524(jsonDataArch);
+                rsObj = JSONObject.fromObject(rsData);
+                if (String.valueOf(rsObj.get("retcode")).equals("0")) {
+                    log.info("归档信息成功");
+                } else {
+                    log.info("归档信息失败");
+
+                }
+
+
             }
 
 
         } catch (Exception e) {
-
+            System.out.println(e);
         }
         System.out.println("业务线程执行...Name=" + Thread.currentThread().getName() + " ," + userDocument.getCustName());
     }

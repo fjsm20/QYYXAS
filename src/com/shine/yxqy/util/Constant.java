@@ -15,7 +15,8 @@ public class Constant {
     public static final String WT_IP="wt_ip";
     public static final String LOCAL_TMP_PATH="local_tmp_path";
 
-    public static final String BUSI_CODE="busi_code";
+    public static final String KH_BUSI_CODE="kh_busi_code";
+    public static final String YWBL_BUSI_CODE="ywbl_busi_code";
     public static final String CONFIG_FILENAME="qyyxas_conf.properties";
     public static final String FTP_URL="ftp_url";
     public static final String CONFIG_PARAM_FILENAME="req_param.properties";
@@ -32,6 +33,19 @@ public class Constant {
     public static final String OPERATE_TIME="operate_time";
     public static final String DATE_TYPE="date_type";
     public static final String DAY_OF_MONTH="day_of_month";
+
+
+    public static final String AFTER_ID="AFTER_ID";
+    public static final String BEFORE_ID="BEFORE_ID";
+    public static final String POLICE_ID="POLICE_ID";
+    public static final String GROUP_ID="GROUP_ID";
+    public static final String AVATAR_ID="AVATAR_ID";
+    public static final String SIGN_FILE_ID="SIGN_FILE_ID";
+    public static final String VIDEO_ID="VIDEO_ID";
+    public static final String KHXY_ID="KHXY_ID";
+    public static final String BLXY_ID="BLXY_ID";
+
+
 
 
 

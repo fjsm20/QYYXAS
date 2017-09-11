@@ -24,12 +24,12 @@
 
     <bean id="requestTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
         <property name="jobDetail" ref="requestJobDetail"/>
-        <property name="cronExpression" value="0/5 * * * * ?"/>
+        <property name="cronExpression" value="*/5 * * * * ?"/>
     </bean>
 
     <bean id="checkFileTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="checkFileDetail" />
-		<property name="cronExpression" value="* 0/3 * * * ?" />
+		<property name="cronExpression" value="0 */2 * * * ?" />
     </bean>
 
     <!--调度工厂-->

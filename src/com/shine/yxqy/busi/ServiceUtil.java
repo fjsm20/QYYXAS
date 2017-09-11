@@ -213,5 +213,40 @@ public class ServiceUtil {
         return rsData;
     }
 
+    /**
+     * 影像归档接口
+     * @param paramMap
+     * @return
+     * @throws Exception
+     */
+    public static String archive020524(Map<String,String> paramMap) throws Exception{
+        String token = getBusToken();
+        String urlStr = fsServerURL+Constant.SUBMIT_PROCSCANINFO+token;
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("method_id","020524");
+        jsonObject.put("src_order_no",paramMap.get("src_order_no"));
+        jsonObject.put("busi_code",paramMap.get("busi_code"));
+        jsonObject.put("cust_prop",paramMap.get("cust_prop"));
+        jsonObject.put("acct_code",paramMap.get("acct_code"));
+        jsonObject.put("cert_type",paramMap.get("cert_type"));
+        jsonObject.put("cert_code",paramMap.get("cert_code"));
+        jsonObject.put("cust_name",paramMap.get("cust_name"));
+        jsonObject.put("dep_code",paramMap.get("dep_code"));
+        jsonObject.put("khfs",paramMap.get("2"));
+        jsonObject.put("op_user_code",paramMap.get("user_code"));
+        jsonObject.put("app_id",paramMap.get("app_id"));
+        jsonObject.put("opr_date",paramMap.get("opr_date"));
+        jsonObject.put("action_type","data_inte");
+
+
+        System.out.println(jsonObject.toString());
+
+        String rsData = HttpUtil.remoteRequest(urlStr,jsonObject.toString());
+
+        log.info("事中影像信息提交：" + rsData);
+        //{"retcode":"0","retdesc":"提交事中影像信息成功！","ret_code":"0","ret_msg":"提交事中影像信息成功！","retvalue":"提交事中影像信息成功！","check_code":""}
+        return rsData;
+    }
 
 }

@@ -55,7 +55,7 @@ public class HttpUtil {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            log.debug("URL«Î«Û:[" + requestUrl + "] ß∞‹");
+            log.info("URL«Î«Û:[" + requestUrl + "] ß∞‹");
             throw new Exception("URL«Î«Û:[" + requestUrl + "] ß∞‹");
         }
         return null;
