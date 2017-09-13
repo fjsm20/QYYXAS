@@ -107,6 +107,7 @@ public class CollectDataExecuter implements Runnable {
                 jsonDataArch.put("expire_time", "10");
                 jsonDataArch.put("action_type", "data_inte");
 
+                
 
 
                 System.out.println("πÈµµ–≈œ¢£∫"+jsonDataArch.toString());
