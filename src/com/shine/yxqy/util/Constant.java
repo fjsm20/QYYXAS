@@ -45,7 +45,8 @@ public class Constant {
     public static final String KHXY_ID="KHXY_ID";
     public static final String BLXY_ID="BLXY_ID";
 
-
+    //URL接口，请求参数source，其值分别为wzh:无纸化，dazx:档案中心
+    public static final String SOURCE_TYPE = "source";
 
 
 

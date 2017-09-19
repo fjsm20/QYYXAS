@@ -6,6 +6,8 @@ import com.shine.yxqy.po.YXFile;
 import com.shine.yxqy.util.ConfigUtil;
 import com.shine.yxqy.util.Constant;
 import net.sf.json.JSONObject;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -56,7 +58,9 @@ public class CollectDataExecuter implements Runnable {
 
                 }
 
-                userDocument.setDepCode("0004");
+                if (StringUtils.isEmpty(userDocument.getDepCode())) {
+                    userDocument.setDepCode("0004");
+                }
                 //提交信息
                 Map<String, String> jsonData = new HashMap<String, String>();
                 jsonData.put("method_id", "020123");
@@ -100,6 +104,7 @@ public class CollectDataExecuter implements Runnable {
                 jsonDataArch.put("opr_date",  userDocument.getOprDate());
                 jsonDataArch.put("dep_code",  userDocument.getDepCode());
                 jsonDataArch.put("khfs","2");
+                //这边使用的是op_user_code 的key
                 jsonDataArch.put("op_user_code", (userDocument.getUserCode().length()>=1)?userDocument.getUserCode(): appId);
                 jsonDataArch.put("app_id", appId);
                 jsonDataArch.put("stage", "9");
@@ -107,16 +112,16 @@ public class CollectDataExecuter implements Runnable {
                 jsonDataArch.put("expire_time", "10");
                 jsonDataArch.put("action_type", "data_inte");
 
-                
+
 
 
                 System.out.println("归档信息："+jsonDataArch.toString());
                 rsData = ServiceUtil.archive020524(jsonDataArch);
                 rsObj = JSONObject.fromObject(rsData);
                 if (String.valueOf(rsObj.get("retcode")).equals("0")) {
-                    log.info("归档信息成功");
+                    log.info("归档信息成功\n" + rsData);
                 } else {
-                    log.info("归档信息失败");
+                    log.info("归档信息失败\n" + rsData);
 
                 }
 
