@@ -70,6 +70,7 @@ public class FileDownloadExecuter implements Runnable {
                     System.out.println("开始下载文件");
                     ftpClient.changeWorkingDirectory(new String(relaPath.getBytes("gbk"), "iso-8859-1"));
                     localPath = localPath + "/" + relaPath;
+
                     iterateFTPDir(localPath, fFileList);
                     System.out.println("解析结束：size="+fFileList.size());
 
@@ -78,6 +79,7 @@ public class FileDownloadExecuter implements Runnable {
                     String custxmlPath = localPath+"/"+Constant.CUST_XML;
                     xmlService.iterateAnalysisXML(custxmlPath,listUD);
                     System.out.println("xml解析结束，统计："+listUD.size());
+
                     for( UserDocument ud:listUD){
                         System.out.println("姓名："+ud.getCustName());
                         System.out.println("有效文件："+ud.getFileList().size());
@@ -87,9 +89,9 @@ public class FileDownloadExecuter implements Runnable {
                             System.out.println(yf.getSourceNo()+" ,"+yf.getModuleName());
                         }
 
-                        if(ud.getCustName().equals("测试姓名五")){
-                            TaskThreadPool.addTask(ud);
-                        }
+                        TaskThreadPool.addTask(ud);
+
+                        //System.out.println(ud);
                     }
 
 
@@ -143,7 +145,11 @@ public class FileDownloadExecuter implements Runnable {
         }
     }
 
-
+    /**
+     * beforeOpenConnect将用户密码ip端口放到map中
+     * @param url ftp的url，提取出用户密码ip端口
+     * @return 返回装着参数的map
+     */
     public Map<String, Object> beforeOpenConnect(String url) {
         Map<String, Object> map = new HashMap<String, Object>();
         if (StringUtils.isEmpty(url)) {
@@ -169,24 +175,36 @@ public class FileDownloadExecuter implements Runnable {
         return map;
     }
 
+    /**
+     * 遍历FTP目录，并下载有效文件
+     * @param localPath 本地保存文件的目录地址
+     * @param fFileList 文件夹及文件列表
+     * @throws IOException
+     */
     public void iterateFTPDir(String localPath, List<FtpUtil.FFile> fFileList) throws IOException {
         OutputStream outputStream =null;
         try {
             FTPFile[] ftpFiles = ftpClient.listFiles();
+
+            //判断ftpFiles是否有值，并且文件数大于0
             if (ftpFiles != null && ftpFiles.length > 0) {
                 for (int i = 0; i < ftpFiles.length; i++) {
                     FTPFile file = ftpFiles[i];
                     if (file.isFile()) {
                         FileUtil.insureDirExist(localPath);
                         try {
-                            outputStream = new FileOutputStream(localPath + "/" + new String(file.getName().getBytes("iso-8859-1"), "gbk"));
-                            System.out.println(new String((localPath + "/" + file.getName()).getBytes("iso-8859-1"), "gbk"));
+                            //这里文件地址字符串使用ISO-8859-1解码，在使用gbk编码，如果文件名包含中文，会出现乱码
+                            //反而使用utf-8编码后，就能显示正常的中文。
+                            outputStream = new FileOutputStream(localPath + "/" + new String(file.getName().getBytes("iso-8859-1"), "utf-8"));
+                            System.out.println(new String((localPath + "/" + file.getName()).getBytes("iso-8859-1"), "utf-8"));
                         }catch (Exception e){
-                            System.out.println("FTP获取的文件名为非法路径："+new String(file.getName().getBytes("iso-8859-1"), "gbk"));
+                            System.out.println("FTP获取的文件名为非法路径："+new String(file.getName().getBytes("iso-8859-1"), "utf-8"));
                             e.printStackTrace();
                             continue;
                         }
+                        //下载文件
                         ftpClient.retrieveFile(file.getName(), outputStream);
+                        //将文件信息添加到fFileList中
                         fFileList.add(new FtpUtil.FFile("", file.getName(), file.getSize()));
                         if(outputStream !=null){
                             outputStream.flush();
@@ -212,7 +230,7 @@ public class FileDownloadExecuter implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if(outputStream !=null){
+            if(outputStream != null){
                 outputStream.flush();
                 outputStream.close();
             }

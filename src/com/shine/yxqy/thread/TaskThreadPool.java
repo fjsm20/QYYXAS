@@ -81,6 +81,9 @@ public class TaskThreadPool {
 
     /**
      * 下载文件夹任务
+     * @param ftpUrl ftp服务器的url
+     * @param relaPath 服务器中文件的相对路径
+     * @param localPath 保存在本地的路径
      */
     public static void addDownloadTask(String ftpUrl,String relaPath,String localPath)throws Exception {
         if(StringUtils.isNotEmpty(relaPath) && StringUtils.isNotEmpty(ftpUrl)){
