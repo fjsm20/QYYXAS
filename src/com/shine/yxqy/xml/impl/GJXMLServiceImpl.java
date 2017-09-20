@@ -1,11 +1,9 @@
 package com.shine.yxqy.xml.impl;
 
-import com.shine.yxqy.po.FileType;
-import com.shine.yxqy.po.UserDocument;
-import com.shine.yxqy.po.YXFile;
-import com.shine.yxqy.util.ConfigUtil;
-import com.shine.yxqy.util.Constant;
-import com.shine.yxqy.xml.XMLService;
+import java.io.File;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -14,11 +12,12 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.stereotype.Component;
 
-import javax.sound.midi.Soundbank;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.shine.yxqy.po.FileType;
+import com.shine.yxqy.po.UserDocument;
+import com.shine.yxqy.po.YXFile;
+import com.shine.yxqy.util.ConfigUtil;
+import com.shine.yxqy.util.Constant;
+import com.shine.yxqy.xml.XMLService;
 
 /**
  * 国泰君安XML文件解析
@@ -72,7 +71,9 @@ public class GJXMLServiceImpl extends XMLService {
 					}
 					if ("CUST_ID".equals(elementInner.getName())) {
 						ud.setCustId(elementInner.getText());
-						relaFilePath = relaPath + "/" + element.getText();//设置文件的相对路径
+						relaFilePath = relaPath + "/" + elementInner.getText();//设置文件的相对路径
+//						System.out.println(relaFilePath);
+//						System.out.println(elementInner.getText());
 						continue;
 					}
 					if ("CZY".equals(elementInner.getName())) {
@@ -103,9 +104,14 @@ public class GJXMLServiceImpl extends XMLService {
 						ud.setSignFileId(elementInner.getText());
 						continue;
 					}
+					if ("BRANCH_NO".equals(elementInner.getName())) {
+						ud.setDepCode(elementInner.getTextTrim());
+						continue;
+					}
 
-					if (elementInner.getName().contains("YXZL") || elementInner.getName().contains("YXZL_SP") ||
-							elementInner.getName().contains("XY")) {
+					if (elementInner.getName().contains("YXZL")
+							|| elementInner.getName().contains("YXZL_SP")
+							|| elementInner.getName().contains("XY")) {
 						doFileDetail(elementInner, ud, relaFilePath);
 					}
 				}
@@ -132,54 +138,71 @@ public class GJXMLServiceImpl extends XMLService {
 	 * @param userDoc 用户对象
 	 * @param relaPath 相对路径
 	 */
-	private void doFileDetail(Element element,UserDocument userDoc,String relaPath) {
-		List<YXFile> existsFileList = userDoc.getFileList();
-		List<YXFile> notExistsFileList = userDoc.getLostFileList();
+	@SuppressWarnings("unchecked")
+	private void doFileDetail(Element element, UserDocument userDoc, String relaPath) {
+//		List<YXFile> existsFileList = userDoc.getFileList();
+//		List<YXFile> notExistsFileList = userDoc.getLostFileList();
 		List<Element> elist = element.elements();
 		int size = elist.size();
+
 		//获取YXZL或YXZL_SP标签的子标签元素
 		YXFile yf = new YXFile();
-		for(int i=0;i<size;i++){
+		for(int i=0; i<size; i++){
 			Element ele = (Element) elist.get(i);
 			//获取ID值
-			if ("ID".equals(ele.getName())) {
+			if ("ID".equals(ele.getName()) 								//因为测试环境中存在，一个<AFTER_ID>或者其他项
+					&& (ele.getText().equals(userDoc.getAfterId())		//对应着多个<YXZL>标签
+					|| ele.getText().equals(userDoc.getBeforeId())		//也就是说，一个图片类型有多个多个图片文件
+					|| ele.getText().equals(userDoc.getAvatarId())		//故而，加上这几个判断条件，予以排除
+					|| ele.getText().equals(userDoc.getSignFileId())	//使得，一个图片类型只有一张图片
+					|| ele.getText().equals(userDoc.getPoliceId())		//并且取的图片是<AFTER_ID>或者同类型对标签中值对应的那个<YXZL>
+			) ) {
 				yf.setId(ele.getText());
+				continue;
 			}
 			//获取文件名称
 			if ("FILE_NAME".equals(ele.getName())) {
 				yf.setFileName(ele.getText());
-				yf.setAbsPath((relaPath+"/"+userDoc.getCustId()+"/"+ele.getText()).trim());
+				yf.setAbsPath((relaPath + "/" + ele.getText()).trim());
+				continue;
 			}
 
 			//业务ID
 			if ("MODULE_ID".equals(ele.getName())) {
 				yf.setModuleId(ele.getText());
+				continue;
 			}
 
 			if ("ADD_DATE".equals(ele.getName())) {
 				yf.setAdddate(ele.getText());
+				continue;
 			}
 			if ("MODULE_NAME".equals(ele.getName())) {
 				yf.setModuleName(ele.getText());
-				System.out.println(FileType.getFileType(ele.getTextTrim()));
+				//System.out.println(FileType.getFileType(ele.getTextTrim()));
 				yf.setSourceNo(FileType.getFileType(ele.getTextTrim()));
+				continue;
 			}
 
+			//处理协议文件
 			if ("File".equals(ele.getName())) {
 				yf.setFileName(ele.getText());
-				yf.setAbsPath((relaPath+"/"+userDoc.getCustId()+"/"+ele.getText().trim()));
+				yf.setAbsPath(relaPath + "/" + ele.getText().trim());
 				if(relaPath.toLowerCase().contains("/ywbl/")){
-					yf.setSourceNo(ConfigUtil.getParamProperty(Constant.BLXY_ID));
+					yf.setSourceNo(ConfigUtil.getProperty(Constant.BLXY_ID));
 				}else{
-					yf.setSourceNo(ConfigUtil.getParamProperty(Constant.KHXY_ID));
+					yf.setSourceNo(ConfigUtil.getProperty(Constant.KHXY_ID));
 				}
 			}
 		}
 
+//		System.out.println(yf.getAbsPath());
 
-		if (StringUtils.isNotEmpty(yf.getAbsPath()) && new File(yf.getAbsPath()).exists()
-				&& (yf.getSourceNo() != null && !yf.getSourceNo().equals("null"))) {
-			System.out.println("**=" + yf.getSourceNo());
+		if (StringUtils.isNotEmpty(yf.getAbsPath())
+				&& new File(yf.getAbsPath()).exists()
+				&& (yf.getSourceNo() != null
+				&& !yf.getSourceNo().equals("null"))) {
+			//System.out.println("**=" + yf.getSourceNo());
 			userDoc.getFileList().add(yf);
 		} else {
 			userDoc.getLostFileList().add(yf);
